@@ -1,5 +1,9 @@
 <h2 id="availablescripts">Getting started</h2>
 
+<p>Install packages</p>
+
+<h3><code>npm install --legacy-peer-deps</code></h3> 
+
 <p>In the project directory, you can run:</p>
 
 <h3 id="npmstart"><code>npm start</code></h3>
