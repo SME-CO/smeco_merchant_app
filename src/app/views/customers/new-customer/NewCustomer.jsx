@@ -56,8 +56,8 @@ const NewCustomer = () => {
             otp : state.otp
         }
 
-        const response = await ApiIndex.CustomerApi.createCustomer(formData).then(()=>{cleanForm()});
-        console.log(response);
+        const response = await ApiIndex.CustomerApi.createCustomer(formData);
+        cleanForm();
       } catch (error) {
         console.log(error);
       }
@@ -82,11 +82,7 @@ const NewCustomer = () => {
     };
 
     const cleanForm = () => {
-      state.firstName = "";
-      state.lastName = "";
-      state.nic = "";
-      state.mobile = "";
-      state.otp = "";
+      setState({firstName : "", lastName : "", nic : "", mobile : "", otp : ""});
     }
 
   
