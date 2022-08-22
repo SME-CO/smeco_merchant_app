@@ -4,8 +4,8 @@ export const navigations = [
     name: 'Customers',
     icon: 'group',
     children: [
-      { name: 'New Customer', iconText: 'SI', path: '/dashboard/default' },
-      { name: 'Manage Customers', iconText: 'SU', path: '/' },
+      { name: 'New Customer', iconText: 'SI', path: '/customers/new' },
+      { name: 'Manage Customers', iconText: 'SU', path: '/customers/manage' },
     ],
   },
   { label: 'PAGES', type: 'label' },
