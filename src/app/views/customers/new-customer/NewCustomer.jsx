@@ -8,13 +8,15 @@ import {
     RadioGroup,
     styled,
     Snackbar,
-    Alert
+    Alert,
+    filledInputClasses
   } from "@mui/material";
 import { Span } from "app/components/Typography";
 import { useEffect, useState } from "react";
 import { TextValidator, ValidatorForm } from "react-material-ui-form-validator";
 import React from "react";
 import ApiIndex from "../../../../api/index";
+import ContinuousSlider from "app/views/material-kit/slider/ContinuousSlider";
 
 const TextField = styled(TextValidator)(() => ({
     width: "100%",
@@ -32,18 +34,22 @@ const Container = styled("div")(({ theme }) => ({
 
 const NewCustomer = () => {
     const [state, setState] = useState({ date: new Date() });
-    const [isOTPSent, setIsOTPSent] = useState(false);
-    // const [openOTPSuccess, setOpenOTPSuccess] = React.useState(false);
-    // const [openOTPFail, setOpenOTPFail] = React.useState(false);
+    const [openAlert, setOpenAlert] = React.useState(false);
+    const [isAlert, setIsAlert] = React.useState(false);
+    const [alertMessage, setAlertMessage] = React.useState('');
+    const [alertType, setAlertType] = React.useState('');
+
+    const hideAlert = () => {
+      if(isAlert){
+        setTimeout(() => {setIsAlert(false)}, 3000);
+      }
+    }
   
     useEffect(() => {
-      ValidatorForm.addValidationRule("isPasswordMatch", (value) => {
-        if (value !== state.password) return false;
-  
-        return true;
-      });
-      return () => ValidatorForm.removeValidationRule("isPasswordMatch");
-    }, [state.password]);
+      hideAlert();
+    }, [hideAlert]);
+
+    
   
     const handleSubmit = async () => {
       try {
@@ -57,22 +63,54 @@ const NewCustomer = () => {
         }
 
         const response = await ApiIndex.CustomerApi.createCustomer(formData);
+        setAlertType('success');
+        setAlertMessage('Cutomer created sucessfully');
+        setIsAlert(true);
         cleanForm();
       } catch (error) {
         console.log(error);
+        setAlertType('error');
+        if(error.code == 400) {
+          setAlertMessage(error.message);
+        }else if(error.code == 500) {
+          setAlertMessage("Sorry, something went wrong, Please try again later");
+        }else{
+          setAlertMessage("Sorry, server not connected, Please try again later");
+        }
+
+        setIsAlert(true);
       }
     };
 
     const handleSendOTP = async () => {
         try {
+
+          if(!state.mobile){
+            setAlertType('error');
+            setAlertMessage('Please Enter Customer Mobile number');
+            setIsAlert(true);
+            return;
+          }
+
           const formData = {
               mobile: state.mobile
           }
   
           const response = await ApiIndex.CustomerApi.sendOTP(formData);
-          setIsOTPSent(true);
+          setAlertType('success');
+          setAlertMessage('OTP sent to customer mobile, Please enter OTP');
+          setIsAlert(true);
         } catch (error) {
           console.log(error);
+          setAlertType('error');
+          if(error.code == 400) {
+            setAlertMessage(error.message);
+          }else if(error.code == 500) {
+            setAlertMessage("Sorry, OTP is not sent, Please try again later");
+          }else{
+            setAlertMessage("Sorry, server not connected, Please try again later");
+          }
+        setIsAlert(true);
         }
       };
   
@@ -83,6 +121,13 @@ const NewCustomer = () => {
 
     const cleanForm = () => {
       setState({firstName : "", lastName : "", nic : "", mobile : "", otp : ""});
+    }
+
+    function handleClose(_, reason) {
+      if (reason === "clickaway") {
+        return;
+      }
+      setOpenAlert(false);
     }
 
   
@@ -97,6 +142,14 @@ const NewCustomer = () => {
 
     return (
         <Container>
+            { isAlert && 
+            <Grid container alignItems="center" justifyContent="center" style={{ minHeight: '11vh' }}>
+              <Grid item xs={6}>
+                <Alert severity={alertType}>{alertMessage}</Alert>
+              </Grid>
+            </Grid>
+            }
+            
             <SimpleCard title="New Customer">
                 <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
                     <Grid container spacing={6}>
@@ -194,17 +247,17 @@ const NewCustomer = () => {
                  </ValidatorForm>
             </SimpleCard>
 
-            {/* <Snackbar open={openOTPSuccess} autoHideDuration={6000}>
-              <Alert severity="success" sx={{ width: "100%" }} variant="filled">
+            <Snackbar open={openAlert} autoHideDuration={4000}>
+              <Alert severity="success" sx={{ width: "100%" }} onClose={handleClose} variant="filled">
                   OTP sent Successfully!
               </Alert>
             </Snackbar>
 
-            <Snackbar open={openOTPFail} autoHideDuration={6000} >
-              <Alert severity="error" sx={{ width: "100%" }} variant="filled">
+            <Snackbar open={openAlert} autoHideDuration={4000} >
+              <Alert severity="error" sx={{ width: "100%" }} onClose={handleClose} variant="filled">
                   Please Enter OTP
               </Alert>
-            </Snackbar> */}
+            </Snackbar>
         </Container>
     );
   };

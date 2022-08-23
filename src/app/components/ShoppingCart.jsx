@@ -119,9 +119,9 @@ function ShoppingCart({ container }) {
   return (
     <Fragment>
       <IconButton onClick={handleDrawerToggle}>
-        <Badge color="secondary" badgeContent={cartList.length}>
+        {/* <Badge color="secondary" badgeContent={cartList.length}>
           <Icon sx={{ color: textColor }}>shopping_cart</Icon>
-        </Badge>
+        </Badge> */}
       </IconButton>
 
       <ThemeProvider theme={settings.themes[settings.activeTheme]}>

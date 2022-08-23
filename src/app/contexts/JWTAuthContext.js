@@ -13,10 +13,6 @@ const isValidToken = (accessToken) => {
     if (!accessToken) {
         return false
     }
-
-    const decodedToken = jwtDecode(accessToken)
-    const currentTime = Date.now() / 1000
-    return decodedToken.exp > currentTime
 }
 
 const setSession = (accessToken) => {
@@ -84,11 +80,19 @@ export const AuthProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
 
     const login = async (email, password) => {
-        const response = await axios.post('/api/auth/login', {
+        const response = await axios.post('/customersUsers/login', {
             email,
             password,
         })
-        const { accessToken, user } = response.data
+        
+        console.log(response);
+
+        const accessToken = response.data.token;
+        const user = {
+            name : response.data.firstName,
+            avatar : 'https://www.kindpng.com/picc/m/78-785827_user-profile-avatar-login-account-male-user-icon.png'
+        }
+        
 
         setSession(accessToken)
 

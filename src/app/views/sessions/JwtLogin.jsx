@@ -34,9 +34,9 @@ const JWTRoot = styled(JustifyBox)(() => ({
 
 // inital login credentials
 const initialValues = {
-  email: 'jason@ui-lib.com',
-  password: 'dummyPass',
-  remember: true,
+  email: '',
+  password: '',
+  // remember: true,
 };
 
 // form field validation schema
@@ -114,7 +114,7 @@ const JwtLogin = () => {
                     />
 
                     <FlexBox justifyContent="space-between">
-                      <FlexBox gap={1}>
+                      {/* <FlexBox gap={1}>
                         <Checkbox
                           size="small"
                           name="remember"
@@ -124,7 +124,7 @@ const JwtLogin = () => {
                         />
 
                         <Paragraph>Remember Me</Paragraph>
-                      </FlexBox>
+                      </FlexBox> */}
 
                       <NavLink
                         to="/session/forgot-password"
