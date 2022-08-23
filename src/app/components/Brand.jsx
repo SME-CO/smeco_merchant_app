@@ -24,15 +24,15 @@ const Brand = ({ children }) => {
   return (
     <BrandRoot>
       <Box display="flex" alignItems="center">
-        <MatxLogo />
+        {/* <MatxLogo /> */}
         <StyledSpan mode={mode} className="sidenavHoverShow">
-          Matx
+          SMECO
         </StyledSpan>
       </Box>
 
-      <Box className="sidenavHoverShow" sx={{ display: mode === 'compact' ? 'none' : 'block' }}>
+      {/* <Box className="sidenavHoverShow" sx={{ display: mode === 'compact' ? 'none' : 'block' }}>
         {children || null}
-      </Box>
+      </Box> */}
     </BrandRoot>
   );
 };

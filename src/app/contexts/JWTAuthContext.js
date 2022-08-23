@@ -13,10 +13,6 @@ const isValidToken = (accessToken) => {
     if (!accessToken) {
         return false
     }
-
-    const decodedToken = jwtDecode(accessToken)
-    const currentTime = Date.now() / 1000
-    return decodedToken.exp > currentTime
 }
 
 const setSession = (accessToken) => {
@@ -25,6 +21,7 @@ const setSession = (accessToken) => {
         axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`
     } else {
         localStorage.removeItem('accessToken')
+        localStorage.removeItem('role')
         delete axios.defaults.headers.common.Authorization
     }
 }
@@ -84,13 +81,20 @@ export const AuthProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
 
     const login = async (email, password) => {
-        const response = await axios.post('/api/auth/login', {
+        const response = await axios.post('/merchants/login', {
             email,
             password,
         })
-        const { accessToken, user } = response.data
+        
+        const accessToken = response.data.token;
+        const user = {
+            name : response.data.user.firstName,
+            avatar : 'https://www.kindpng.com/picc/m/78-785827_user-profile-avatar-login-account-male-user-icon.png'
+        }
+        
 
-        setSession(accessToken)
+        setSession(accessToken);
+        localStorage.setItem('role', response.data.role)
 
         dispatch({
             type: 'LOGIN',

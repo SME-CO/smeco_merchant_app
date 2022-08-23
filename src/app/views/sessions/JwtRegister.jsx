@@ -1,14 +1,16 @@
 import { useTheme } from '@emotion/react';
 import { LoadingButton } from '@mui/lab';
-import { Card, Checkbox, Grid, TextField } from '@mui/material';
+import { Card, Checkbox, Grid, TextField, Alert } from '@mui/material';
 import { Box, styled } from '@mui/system';
 import { Paragraph } from 'app/components/Typography';
 import useAuth from 'app/hooks/useAuth';
-import { Formik } from 'formik';
-import { useState } from 'react';
+import { Formik, validateYupSchema } from 'formik';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import Multiselect from 'multiselect-react-dropdown';
+import ApiIndex from "../../../api/index";
+import React from "react";
 
 const FlexBox = styled(Box)(() => ({ display: 'flex', alignItems: 'center' }));
 
@@ -35,25 +37,28 @@ const JWTRegister = styled(JustifyBox)(() => ({
 
 // inital login credentials
 const initialValues = {
-  firstname: '',
-  lastname: '',
+  firstName: '',
+  lastName: '',
   email: '',
   mobile: '',
   phoneNumber: '',
-  address: '',
-  emailAddress: '',
+  shopAddress: '',
   shopName: '',
-  username: '',
   password: '',
+  cpassword: '',
   // remember: true,
 };
 
 // form field validation schema
 const validationSchema = Yup.object().shape({
   password: Yup.string()
-    .min(6, 'Password must be 6 character length')
     .required('Password is required!'),
   email: Yup.string().email('Invalid Email address').required('Email is required!'),
+  firstName: Yup.string().required('First name is required!'),
+  mobile: Yup.string().required('Phone Number is required!'),
+  shopName: Yup.string().required('Shop Name is required!'),
+  shopAddress: Yup.string().required('Shop Address is required!'),
+  cpassword: Yup.string().required('Confirm Password is required!'),
 });
 
 const JwtRegister = () => {
@@ -61,18 +66,62 @@ const JwtRegister = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isAlert, setIsAlert] = React.useState(false);
+  const [alertMessage, setAlertMessage] = React.useState('');
+  const [alertType, setAlertType] = React.useState('');
 
-  const handleFormSubmit = (values) => {
+
+  const hideAlert = () => {
+    if(isAlert){
+      setTimeout(() => {setIsAlert(false)}, 6000);
+    }
+  }
+
+  useEffect(() => {
+    hideAlert();
+  }, [hideAlert]);
+
+  const handleFormSubmit = async (values) => {
     setLoading(true);
+    console.log(values);
+
+    if(values.cpassword != values.password){
+      setAlertType('error');
+      setAlertMessage('Confirm Password Mismatch');
+      setIsAlert(true);
+      return;
+    }
 
     try {
-      console.log(values.firstname);
-      console.log(values.shopName);
-      register(values.email, values.username, values.password);
-      navigate('/');
+      const formData = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        shopName: values.shopName,
+        email: values.email,
+        phoneNumber: values.mobile,
+        shopMobile: values.phoneNumber,
+        shopAddress: values.shopAddress,
+        shopName: values.shopName,
+        password: values.password,
+      }
+
+      const response = await ApiIndex.MerchantApi.createMerchant(formData);
+      console.log(response);
       setLoading(false);
-    } catch (e) {
-      console.log(e);
+      navigate('/session/signin');
+    } catch (error) {
+      console.log(error);
+      setAlertType('error');
+      if(error.code == 400) {
+        setAlertMessage(error.message);
+      }else if(error.code == 500) {
+        setAlertMessage("Sorry, something went wrong, Please try again later");
+      }else{
+        console.log("came");
+        setAlertMessage("Sorry, server not connected, Please try again later");
+      }
+
+      setIsAlert(true);
       setLoading(false);
     }
   };
@@ -98,7 +147,15 @@ const JwtRegister = () => {
                         src="/assets/images/illustrations/posting_photo.svg"
                       />
                     </ContentBox>
+                    { isAlert && 
+                      <Grid container alignItems="center" justifyContent="center" style={{ minHeight: '11vh' }}>
+                        <Grid item xs={8}>
+                          <Alert severity={alertType}>{alertMessage}</Alert>
+                        </Grid>
+                      </Grid>
+                    }
                   </center>
+
 
                   <h3>Business Owner details</h3>
                   <Grid container>
@@ -107,18 +164,16 @@ const JwtRegister = () => {
                         fullWidth
                         size="small"
                         type="text"
-                        name="firstname"
+                        name="firstName"
                         label="First Name"
                         variant="outlined"
                         onBlur={handleBlur}
-                        value={values.firstname}
+                        value={values.firstName}
                         onChange={handleChange}
-                        helperText={touched.username && errors.username}
-                        error={Boolean(errors.username && touched.username)}
-                        // formErrors={['This field is required']}
+                        helperText={touched.firstName && errors.firstName}
+                        error={Boolean(errors.firstName && touched.firstName)}
                         sx={{ mb: 3 }}
                       />
-                      {/* <p>{formErrors.username}</p> */}
                     </Grid>
 
                     <Grid item sm={6} padding={1}>
@@ -126,36 +181,33 @@ const JwtRegister = () => {
                         fullWidth
                         size="small"
                         type="text"
-                        name="lastname"
+                        name="lastName"
                         label="Last Name"
                         variant="outlined"
                         onBlur={handleBlur}
-                        value={values.lastname}
+                        value={values.lastName}
                         onChange={handleChange}
-                        helperText={touched.username && errors.username}
-                        error={Boolean(errors.username && touched.username)}
-                        // errorMessages={['This field is required']}
                         sx={{ mb: 3 }}
                       />
                     </Grid>
                   </Grid>
 
-                  <TextField
-                    fullWidth
-                    size="small"
-                    type="number"
-                    name="mobile"
-                    label="Phone number"
-                    variant="outlined"
-                    onBlur={handleBlur}
-                    value={values.mobile}
-                    onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // validators={['required']}
-                    // errorMessages={['This field is required']}
-                    sx={{ mb: 3 }}
-                  />
+                  <Grid item sm={6} padding={1}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      name="mobile"
+                      label="Phone number"
+                      variant="outlined"
+                      onBlur={handleBlur}
+                      value={values.mobile}
+                      onChange={handleChange}
+                      helperText={touched.mobile && errors.mobile}
+                      error={Boolean(errors.mobile && touched.mobile)}
+                      sx={{ mb: 3 }}
+                    />
+                  </Grid>
 
                   <h3>Business Details</h3>
                   <TextField
@@ -168,24 +220,22 @@ const JwtRegister = () => {
                     onBlur={handleBlur}
                     value={values.shopName}
                     onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // errorMessages={['This field is required']}
+                    helperText={touched.shopName && errors.shopName}
+                    error={Boolean(errors.shopName && touched.shopName)}
                     sx={{ mb: 2 }}
                   />
                   <TextField
                     fullWidth
                     size="small"
                     type="text"
-                    name="address"
+                    name="shopAddress"
                     label="Shop Address"
                     variant="outlined"
                     onBlur={handleBlur}
-                    value={values.address}
+                    value={values.shopAddress}
                     onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // errorMessages={['This field is required']}
+                    helperText={touched.shopAddress && errors.shopAddress}
+                    error={Boolean(errors.shopAddress && touched.shopAddress)}
                     sx={{ mb: 3 }}
                   />
 
@@ -199,23 +249,6 @@ const JwtRegister = () => {
                     onBlur={handleBlur}
                     value={values.phoneNumber}
                     onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // errorMessages={['This field is required']}
-                    sx={{ mb: 3 }}
-                  />
-                  <TextField
-                    fullWidth
-                    size="small"
-                    type="text"
-                    name="email"
-                    label="Email"
-                    variant="outlined"
-                    onBlur={handleBlur}
-                    value={values.email}
-                    onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
                     sx={{ mb: 3 }}
                   />
 
@@ -279,50 +312,47 @@ const JwtRegister = () => {
                     fullWidth
                     size="small"
                     type="text"
-                    name="username"
-                    label="Username"
+                    name="email"
+                    label="Email"
                     variant="outlined"
                     onBlur={handleBlur}
-                    value={values.username}
+                    value={values.email}
                     onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // validators={['required']}
-                    // errorMessages={['This field is required']}
-                    sx={{ mb: 3 }}
-                  />
-                  <TextField
-                    fullWidth
-                    size="small"
-                    type="text"
-                    name="password"
-                    label="Password"
-                    variant="outlined"
-                    onBlur={handleBlur}
-                    value={values.password}
-                    onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // validators={['required']}
-                    // errorMessages={['This field is required']}
+                    helperText={touched.email && errors.email}
+                    error={Boolean(errors.email && touched.email)}
                     sx={{ mb: 3 }}
                   />
 
                   <TextField
                     fullWidth
                     size="small"
-                    type="text"
-                    name="emailAddress"
-                    label=" Shop Email Address"
+                    type="password"
+                    name="password"
+                    label="Password"
                     variant="outlined"
                     onBlur={handleBlur}
-                    value={values.emailAddress}
+                    value={values.password}
                     onChange={handleChange}
-                    helperText={touched.username && errors.username}
-                    error={Boolean(errors.username && touched.username)}
-                    // errorMessages={['This field is required']}
+                    helperText={touched.password && errors.password}
+                    error={Boolean(errors.password && touched.password)}
                     sx={{ mb: 3 }}
                   />
+
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="password"
+                    name="cpassword"
+                    label="Confirm Password"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.cpassword}
+                    onChange={handleChange}
+                    helperText={touched.cpassword && errors.cpassword}
+                    error={Boolean(errors.cpassword && touched.cpassword)}
+                    sx={{ mb: 3 }}
+                  />
+
 
                   <center>
                     <LoadingButton
