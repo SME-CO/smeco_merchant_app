@@ -21,6 +21,7 @@ const setSession = (accessToken) => {
         axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`
     } else {
         localStorage.removeItem('accessToken')
+        localStorage.removeItem('role')
         delete axios.defaults.headers.common.Authorization
     }
 }
@@ -80,21 +81,20 @@ export const AuthProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
 
     const login = async (email, password) => {
-        const response = await axios.post('/customersUsers/login', {
+        const response = await axios.post('/merchants/login', {
             email,
             password,
         })
         
-        console.log(response);
-
         const accessToken = response.data.token;
         const user = {
-            name : response.data.firstName,
+            name : response.data.user.firstName,
             avatar : 'https://www.kindpng.com/picc/m/78-785827_user-profile-avatar-login-account-male-user-icon.png'
         }
         
 
-        setSession(accessToken)
+        setSession(accessToken);
+        localStorage.setItem('role', response.data.role)
 
         dispatch({
             type: 'LOGIN',

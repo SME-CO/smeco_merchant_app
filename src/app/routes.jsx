@@ -3,6 +3,7 @@ import chartsRoute from 'app/views/charts/ChartsRoute';
 import dashboardRoutes from 'app/views/dashboard/DashboardRoutes';
 import materialRoutes from 'app/views/material-kit/MaterialRoutes';
 import customerRoutes from 'app/views/customers/CustomerRoutes';
+import productRoutes from 'app/views/products/ProductRoutes';
 import NotFound from 'app/views/sessions/NotFound';
 import sessionRoutes from 'app/views/sessions/SessionRoutes';
 import { Navigate } from 'react-router-dom';
@@ -15,7 +16,7 @@ const routes = [
         <MatxLayout />
       </AuthGuard>
     ),
-    children: [...dashboardRoutes, ...chartsRoute, ...materialRoutes, ...customerRoutes],
+    children: [...dashboardRoutes, ...chartsRoute, ...materialRoutes, ...customerRoutes, ...productRoutes],
   },
   ...sessionRoutes,
   { path: '/', element: <Navigate to="session/signin" /> },

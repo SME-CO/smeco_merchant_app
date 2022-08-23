@@ -49,8 +49,6 @@ const NewCustomer = () => {
       hideAlert();
     }, [hideAlert]);
 
-    
-  
     const handleSubmit = async () => {
       try {
 

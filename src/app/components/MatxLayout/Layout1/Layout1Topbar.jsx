@@ -109,21 +109,17 @@ const Layout1Topbar = () => {
             <StyledIconButton>
               <Icon>web_asset</Icon>
             </StyledIconButton>
-
-            <StyledIconButton>
-              <Icon>star_outline</Icon>
-            </StyledIconButton>
           </IconBox>
         </Box>
 
         <Box display="flex" alignItems="center">
-          <MatxSearchBox />
+          {/* <MatxSearchBox />
 
           <NotificationProvider>
             <NotificationBar />
-          </NotificationProvider>
+          </NotificationProvider> */}
 
-          <ShoppingCart />
+          {/* <ShoppingCart /> */}
 
           <MatxMenu
             menuButton={
@@ -138,23 +134,23 @@ const Layout1Topbar = () => {
             }
           >
             <StyledItem>
-              <Link to="/">
+              <Link to="/dashboard">
                 <Icon> home </Icon>
                 <Span> Home </Span>
               </Link>
             </StyledItem>
 
-            <StyledItem>
+            {/* <StyledItem>
               <Link to="/page-layouts/user-profile">
                 <Icon> person </Icon>
                 <Span> Profile </Span>
               </Link>
-            </StyledItem>
+            </StyledItem> */}
 
-            <StyledItem>
+            {/* <StyledItem>
               <Icon> settings </Icon>
               <Span> Settings </Span>
-            </StyledItem>
+            </StyledItem> */}
 
             <StyledItem onClick={logout}>
               <Icon> power_settings_new </Icon>

@@ -12,7 +12,7 @@ const SideNav = styled('div')(({ theme, width }) => ({
     left: 0,
     bottom: 0,
     position: 'absolute',
-  },
+},
 }));
 
 const SideNavOverlay = styled('div')(() => ({
