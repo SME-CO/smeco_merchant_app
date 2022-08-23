@@ -8,6 +8,7 @@ import { Formik } from 'formik';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
+import Multiselect from 'multiselect-react-dropdown';
 
 const FlexBox = styled(Box)(() => ({ display: 'flex', alignItems: 'center' }));
 
@@ -34,10 +35,17 @@ const JWTRegister = styled(JustifyBox)(() => ({
 
 // inital login credentials
 const initialValues = {
+  firstname: '',
+  lastname: '',
   email: '',
-  password: '',
+  mobile: '',
+  phoneNumber: '',
+  address: '',
+  emailAddress: '',
+  shopName: '',
   username: '',
-  remember: true,
+  password: '',
+  // remember: true,
 };
 
 // form field validation schema
@@ -58,6 +66,8 @@ const JwtRegister = () => {
     setLoading(true);
 
     try {
+      console.log(values.firstname);
+      console.log(values.shopName);
       register(values.email, values.username, values.password);
       navigate('/');
       setLoading(false);
@@ -71,83 +81,250 @@ const JwtRegister = () => {
     <JWTRegister>
       <Card className="card">
         <Grid container>
-          <Grid item sm={6} xs={12}>
-            <ContentBox>
-              <img
-                width="100%"
-                alt="Register"
-                src="/assets/images/illustrations/posting_photo.svg"
-              />
-            </ContentBox>
-          </Grid>
-
-          <Grid item sm={6} xs={12}>
-            <Box p={4} height="100%">
-              <Formik
-                onSubmit={handleFormSubmit}
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-              >
-                {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
-                  <form onSubmit={handleSubmit}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="text"
-                      name="username"
-                      label="Username"
-                      variant="outlined"
-                      onBlur={handleBlur}
-                      value={values.username}
-                      onChange={handleChange}
-                      helperText={touched.username && errors.username}
-                      error={Boolean(errors.username && touched.username)}
-                      sx={{ mb: 3 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="email"
-                      name="email"
-                      label="Email"
-                      variant="outlined"
-                      onBlur={handleBlur}
-                      value={values.email}
-                      onChange={handleChange}
-                      helperText={touched.email && errors.email}
-                      error={Boolean(errors.email && touched.email)}
-                      sx={{ mb: 3 }}
-                    />
-                    <TextField
-                      fullWidth
-                      size="small"
-                      name="password"
-                      type="password"
-                      label="Password"
-                      variant="outlined"
-                      onBlur={handleBlur}
-                      value={values.password}
-                      onChange={handleChange}
-                      helperText={touched.password && errors.password}
-                      error={Boolean(errors.password && touched.password)}
-                      sx={{ mb: 2 }}
-                    />
-
-                    <FlexBox gap={1} alignItems="center">
-                      <Checkbox
-                        size="small"
-                        name="remember"
-                        onChange={handleChange}
-                        checked={values.remember}
-                        sx={{ padding: 0 }}
+          <Box p={8} height="100%">
+            <Formik
+              onSubmit={handleFormSubmit}
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+            >
+              {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+                <form onSubmit={handleSubmit}>
+                  <center>
+                    <h2>Merchant Register</h2>
+                    <ContentBox>
+                      <img
+                        width="40%"
+                        alt="Register"
+                        src="/assets/images/illustrations/posting_photo.svg"
                       />
+                    </ContentBox>
+                  </center>
 
-                      <Paragraph fontSize={13}>
-                        I have read and agree to the terms of service.
-                      </Paragraph>
-                    </FlexBox>
+                  <h3>Business Owner details</h3>
+                  <Grid container>
+                    <Grid item sm={6} padding={1}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        type="text"
+                        name="firstname"
+                        label="First Name"
+                        variant="outlined"
+                        onBlur={handleBlur}
+                        value={values.firstname}
+                        onChange={handleChange}
+                        helperText={touched.username && errors.username}
+                        error={Boolean(errors.username && touched.username)}
+                        // formErrors={['This field is required']}
+                        sx={{ mb: 3 }}
+                      />
+                      {/* <p>{formErrors.username}</p> */}
+                    </Grid>
 
+                    <Grid item sm={6} padding={1}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        type="text"
+                        name="lastname"
+                        label="Last Name"
+                        variant="outlined"
+                        onBlur={handleBlur}
+                        value={values.lastname}
+                        onChange={handleChange}
+                        helperText={touched.username && errors.username}
+                        error={Boolean(errors.username && touched.username)}
+                        // errorMessages={['This field is required']}
+                        sx={{ mb: 3 }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    name="mobile"
+                    label="Phone number"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.mobile}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // validators={['required']}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 3 }}
+                  />
+
+                  <h3>Business Details</h3>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    name="shopName"
+                    type="text"
+                    label="Shop Name"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.shopName}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="text"
+                    name="address"
+                    label="Shop Address"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.address}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 3 }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    name="phoneNumber"
+                    label=" Shop Phone Number"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.phoneNumber}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 3 }}
+                  />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="text"
+                    name="email"
+                    label="Email"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.email}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    sx={{ mb: 3 }}
+                  />
+
+                  <label onBlur={handleBlur}>Busniess Category</label>
+                  <Multiselect
+                    displayValue="key"
+                    onKeyPressFn={function noRefCheck() {}}
+                    onRemove={function noRefCheck() {}}
+                    onSearch={function noRefCheck() {}}
+                    onSelect={function noRefCheck() {}}
+                    errorMessages={['This field is required']}
+                    options={[
+                      {
+                        cat: 'Group 1',
+                        key: 'Appliances',
+                      },
+                      {
+                        cat: 'Group 1',
+                        key: 'Automotive parts & Accessories',
+                      },
+                      {
+                        cat: 'Group 1',
+                        key: 'Beauty & personal care',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Celephones & Accessories',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Electronics',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Garden & outdoor',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Sports & outdoors',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Toys & games',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Home & Kitchen',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Arts,crafts & Sewing',
+                      },
+                      {
+                        cat: 'Group 2',
+                        key: 'Other',
+                      },
+                    ]}
+                  />
+                  <h3>Account Details</h3>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="text"
+                    name="username"
+                    label="Username"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.username}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // validators={['required']}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 3 }}
+                  />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="text"
+                    name="password"
+                    label="Password"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.password}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // validators={['required']}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 3 }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="text"
+                    name="emailAddress"
+                    label=" Shop Email Address"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    value={values.emailAddress}
+                    onChange={handleChange}
+                    helperText={touched.username && errors.username}
+                    error={Boolean(errors.username && touched.username)}
+                    // errorMessages={['This field is required']}
+                    sx={{ mb: 3 }}
+                  />
+
+                  <center>
                     <LoadingButton
                       type="submit"
                       color="primary"
@@ -155,7 +332,7 @@ const JwtRegister = () => {
                       variant="contained"
                       sx={{ mb: 2, mt: 3 }}
                     >
-                      Regiser
+                      Register
                     </LoadingButton>
 
                     <Paragraph>
@@ -167,11 +344,11 @@ const JwtRegister = () => {
                         Login
                       </NavLink>
                     </Paragraph>
-                  </form>
-                )}
-              </Formik>
-            </Box>
-          </Grid>
+                  </center>
+                </form>
+              )}
+            </Formik>
+          </Box>
         </Grid>
       </Card>
     </JWTRegister>
