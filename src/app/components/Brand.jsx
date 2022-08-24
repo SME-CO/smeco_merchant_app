@@ -1,5 +1,5 @@
 import { Box, styled } from '@mui/material';
-import { MatxLogo } from 'app/components';
+// import Logo from 'src/app/assets/logo.png';
 import useSettings from 'app/hooks/useSettings';
 import { Span } from './Typography';
 
@@ -24,7 +24,7 @@ const Brand = ({ children }) => {
   return (
     <BrandRoot>
       <Box display="flex" alignItems="center">
-        {/* <MatxLogo /> */}
+        <img src="/assets/images/logo.png" alt="" height={50} />
         <StyledSpan mode={mode} className="sidenavHoverShow">
           SMECO
         </StyledSpan>
