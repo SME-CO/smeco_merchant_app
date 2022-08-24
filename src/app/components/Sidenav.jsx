@@ -132,7 +132,7 @@ const Sidenav = ({ children }) => {
 
    useEffect(() => {
     loadSideBarItems();
-  },[loadSideBarItems]);
+  },[]);
 
 
   return (

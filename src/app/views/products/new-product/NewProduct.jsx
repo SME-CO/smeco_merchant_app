@@ -195,9 +195,6 @@ const NewProduct = () => {
                             <TextField {...params} label="Catagory Type" variant="outlined" fullWidth
                              />
                             )}
-                            
-                            
-
                         />
                                {/* <TextField
                                    type="text"

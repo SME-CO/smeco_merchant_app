@@ -52,7 +52,7 @@ import {
 
     useEffect(() => {
         getCustomers();
-    },[getCustomers]);
+    });
   
     return (
       <SimpleCard title="Registered Customers in the System">
