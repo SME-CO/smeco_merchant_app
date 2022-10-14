@@ -119,7 +119,7 @@ import ContinuousSlider from "app/views/material-kit/slider/ContinuousSlider";
 
     useEffect(() => {
         getProducts();
-    });
+    },[]);
   
     return (
       <SimpleCard title="Manage your customers here">

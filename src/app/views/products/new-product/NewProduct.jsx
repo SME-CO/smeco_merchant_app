@@ -47,12 +47,12 @@ const suggestions = [
   { label: 'Home & Kitchen' },
   { label: 'Arts, Crafts & Sewing' },
   
-];const suggestions2 = [
+];
+
+const suggestions2 = [
   { label: 'Offers ' },
   { label: 'Disscount' },
-  { label: 'Regurds' },
-  
-  
+  { label: 'Regurds' },  
 ];
 
 const Container = styled("div")(({ theme }) => ({
@@ -86,9 +86,11 @@ const NewProduct = () => {
             productName : state.productName,
             image : state.image,
             price: state.price,
-            catagory: state.catagory,
+            catagory: state.category,
             offers :state.offers,
         }
+
+        console.log(formData);
 
         const response = await ApiIndex.ProductApi.createProduct(formData);
         cleanForm();
@@ -104,8 +106,12 @@ const NewProduct = () => {
       setState({ ...state, [event.target.name]: event.target.value });
     };
 
+    const handleChangeCategory = (event) => {
+      state.category = event.target.value;
+    };
+
     const cleanForm = () => {
-      setState({productName : "", image : "", price : "", catagory : "", offers : ""});
+      setState({productName : "", image : "", price : "", category : "", offers : ""});
     }
    
 
@@ -114,7 +120,7 @@ const NewProduct = () => {
       productName,
       image,
       price,
-      catagory,
+      category,
       offers
     } = state;
 
@@ -187,15 +193,42 @@ const NewProduct = () => {
             
                         <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
                         <Fragment>
-                        <AutoComplete
+                        {/* <AutoComplete
                             options={suggestions}
                             getOptionLabel={(option) => option.label}
                             
                             renderInput={(params) => (
-                            <TextField {...params} label="Catagory Type" variant="outlined" fullWidth
+                            <TextField {...params}  name="category"  value={category || ""} 
+                            label="Catagory Type" variant="outlined" fullWidth
+                            onChange={handleChange}
                              />
                             )}
-                        />
+                        /> */}
+
+
+                          <FormControl fullWidth>
+                                <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={category || ""}
+                                    name="category"
+                                    label="Category"
+                                    onChange={handleChangeCategory}
+                                    >
+                                    <MenuItem value='Appliances'>Appliances</MenuItem>
+                                    <MenuItem value='Automotive Parts'>Automotive Parts</MenuItem>
+                                    <MenuItem value='Beauty'>Beauty</MenuItem>
+                                    <MenuItem value='Cell Phones & Accessories'>Cell Phones & Accessories</MenuItem>
+                                    <MenuItem value='Garden'>Garden & Outdoor</MenuItem>
+                                    <MenuItem value='Toys & Games'>Toys & Games</MenuItem>
+                                    <MenuItem value='Home & Kitchen'>Home & Kitchen</MenuItem>
+                                    <MenuItem value='Baby'>Baby</MenuItem>
+                                    <MenuItem value='Arts, Crafts & Sewing'>Arts, Crafts & Sewing</MenuItem>
+                                </Select>
+                            </FormControl>   
+                            <br /><br />
+
                                {/* <TextField
                                    type="text"
                                    name="offers"
@@ -206,14 +239,14 @@ const NewProduct = () => {
                                    errorMessages={["this field is required"]}
                       />*/}
 
-                       <AutoComplete
+                       {/* <AutoComplete
                             options={suggestions2}
                             getOptionLabel={(option) => option.label}
                             renderInput={(value) => (
                             <TextField {...value} label="Offres Type" variant="outlined" fullWidth
                              />
                             )}
-                        />
+                        /> */}
                             
 
 

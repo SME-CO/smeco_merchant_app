@@ -82,6 +82,15 @@ const Sidenav = ({ children }) => {
               
             ],
           },
+          {
+            name: 'Promotions',
+            icon: 'group',
+            children: [
+              { name: 'Create Promotions', iconText: 'SI', path: 'products/promotions/new' },
+              { name: 'Manage Product', iconText: 'SU', path: '/products/manage' },
+              
+            ],
+          },
           // {
           //   name: 'Session/Auth',
           //   icon: 'security',
