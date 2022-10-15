@@ -160,9 +160,7 @@ const NewPromotion = () => {
     const syncProductsByCategory = async (category) => {
       try {
           const response = await ApiIndex.ProductApi.getProductsByCategory(category);
-          // console.log(response.data);
           setProductList(response.data);
-          console.log(response.data);
       }
       catch (error) {
           console.log(error);
