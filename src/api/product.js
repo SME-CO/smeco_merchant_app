@@ -8,10 +8,13 @@ const  createProduct = (data) => {
     return axios.post(`/products`, data);
 }
 
-
+const  getProductsByCategory = (category) => {
+    return axios.get(`/products/categories/${category}`);
+} 
 
 export default {
     getProducts: getProducts,
     createProduct: createProduct,
+    getProductsByCategory : getProductsByCategory
 
 };
