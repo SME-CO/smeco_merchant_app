@@ -6,6 +6,7 @@ const ManageCustomers = Loadable(lazy(() => import('./manage-customer/ManageCust
 const AllCustomers = Loadable(lazy(() => import('../admin/AllCustomers')));
 const AllMerchants = Loadable(lazy(() => import('../admin/AllMerchants')));
 const Faq = Loadable(lazy(() => import('../admin/faq')));
+const CustomerCheckout = Loadable(lazy(() => import('./checkout/CustomerCheckout')));
 
 const customerRoutes = [
     {
@@ -15,6 +16,10 @@ const customerRoutes = [
     {
         path : 'customers/manage',
         element: <ManageCustomers/>
+    },
+    {
+        path : 'checkout',
+        element: <CustomerCheckout/>
     },
     {
         path : 'admin/all-customers',

@@ -66,6 +66,8 @@ const Sidenav = ({ children }) => {
     if(window.localStorage.getItem('role') == 'merchant'){
       navigation_contents = [
           { name: 'Dashboard', path: '/dashboard/merchant', icon: 'Quiz' },
+          { name: 'Dashboard', path: '/dashboard/merchant', icon: 'dashboard' },
+          { name: 'Checkout Customer', path: '/checkout', icon: 'dashboard' },
           {
             name: 'Customers',
             icon: 'group',
@@ -79,6 +81,15 @@ const Sidenav = ({ children }) => {
             icon: 'group',
             children: [
               { name: 'New Product', iconText: 'SI', path: '/products/new' },
+              { name: 'Manage Product', iconText: 'SU', path: '/products/manage' },
+              
+            ],
+          },
+          {
+            name: 'Promotions',
+            icon: 'group',
+            children: [
+              { name: 'Create Promotions', iconText: 'SI', path: 'products/promotions/new' },
               { name: 'Manage Product', iconText: 'SU', path: '/products/manage' },
               
             ],
@@ -133,7 +144,7 @@ const Sidenav = ({ children }) => {
 
    useEffect(() => {
     loadSideBarItems();
-  },[loadSideBarItems]);
+  },[]);
 
 
   return (

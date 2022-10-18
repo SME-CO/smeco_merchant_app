@@ -52,7 +52,7 @@ import {
 
     useEffect(() => {
         getMerchants();
-    },[getMerchants]);
+    });
   
     return (
       <SimpleCard title="Registered Merchants in the System">
