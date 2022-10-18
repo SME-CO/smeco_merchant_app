@@ -57,14 +57,15 @@ const Sidenav = ({ children }) => {
               { name: 'Registered Customers', iconText: 'SI', path: 'admin/all-customers' },
               { name: 'Registered Merchants', iconText: 'SU', path: 'admin/all-merchants' },
             ],
-          }
+          },
+          { name: 'FAQs', path: '/dashboard/faq', icon: 'message' }
       ]
       setNavigations(navigation_contents);
     }
 
     if(window.localStorage.getItem('role') == 'merchant'){
       navigation_contents = [
-          { name: 'Dashboard', path: '/dashboard/merchant', icon: 'dashboard' },
+          { name: 'Dashboard', path: '/dashboard/merchant', icon: 'Quiz' },
           {
             name: 'Customers',
             icon: 'group',
