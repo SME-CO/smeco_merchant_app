@@ -80,7 +80,7 @@ const CustomerCheckout = () => {
     const [customerCart, setCustomerCart] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedQuantity, setSelectedQuantity] = useState(0);
-    const [selectedCustomer, setSelectedCustomer] = useState(0);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [customers, setCustomers] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
   
@@ -145,6 +145,7 @@ const CustomerCheckout = () => {
 
     const handleCustomerSearch = (event, values) => {
       setSelectedCustomer(values);
+      console.log(values);
     }
   
     const handleChange = (event) => {
@@ -157,9 +158,10 @@ const CustomerCheckout = () => {
         const productExists = customerCart.filter(item => item.product.id == selectedProduct.id);
         if(productExists.length == 0){
           let item = {
-            product : selectedProduct,  
+            product : selectedProduct,
             purchaseType : 'normal',
             quantity : selectedQuantity,
+            unitPrice : selectedProduct.price,
             total : selectedProduct.price * selectedQuantity
           }  
           let totalCounter = totalAmount + item.total;
@@ -186,8 +188,34 @@ const CustomerCheckout = () => {
         setPurchaseType(event.target.value);
     };
 
-    const handleCheckoutProceed = (event) => {
-      
+    const handleCheckoutProceed = async() => {
+      try{
+
+        if(selectedCustomer!=null){
+
+          let formData = {
+            customerId : selectedCustomer.id,
+            merchantId : parseInt(window.localStorage.getItem('merchant_id')),
+            customerName : selectedCustomer.firstName,
+            totalAmount : totalAmount,
+            cart : customerCart
+          }
+
+          let response = await ApiIndex.ProductApi.productCheckout(formData);
+          setCustomerCart([]);
+          setSelectedCustomer(null);
+          setAlertType('success');
+          setAlertMessage('Purchase Record Added Successfully!');
+          setIsAlert(true);
+        }else{
+          setAlertType('error');
+          setAlertMessage('Please select a customer');
+          setIsAlert(true);
+        }
+      }
+      catch (error) {
+        console.error(error);
+      }
     }
 
     const handleChangeCategoryType = async(event) => {

@@ -469,7 +469,7 @@ const NewPromotion = () => {
                                         { 
                                           productsList && productsList
                                           .map((product, index) => (
-                                          <MenuItem value={product.id}>{product.productName}</MenuItem>
+                                            <MenuItem value={product.id}>{product.productName}</MenuItem>
                                           ))
                                         }
                                     </Select>
@@ -513,7 +513,8 @@ const NewPromotion = () => {
                                       </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
-                                      primary={product.productName}
+
+                                      primary={product.productName + ' - Rs. ' + product.price}
                                       secondary='Secondary'
                                     />
                                 </ListItem>
