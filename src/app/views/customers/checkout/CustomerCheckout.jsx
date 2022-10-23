@@ -80,8 +80,9 @@ const CustomerCheckout = () => {
     const [customerCart, setCustomerCart] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedQuantity, setSelectedQuantity] = useState(0);
-    const [selectedCustomer, setSelectedCustomer] = useState(0);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [customers, setCustomers] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
   
     const hideAlert = () => {
       if(isAlert){
@@ -93,7 +94,8 @@ const CustomerCheckout = () => {
       hideAlert();
       await syncProductsByCategory(selectedCategory);
       await getCustomers();
-    }, [selectedCategory, productBundle, selectedCustomer]);
+      await calculateTotal();
+    }, [selectedCategory, productBundle, selectedCustomer, totalAmount, customerCart]);
 
     const handleSubmit = async () => {
       try {
@@ -143,6 +145,7 @@ const CustomerCheckout = () => {
 
     const handleCustomerSearch = (event, values) => {
       setSelectedCustomer(values);
+      console.log(values);
     }
   
     const handleChange = (event) => {
@@ -155,11 +158,14 @@ const CustomerCheckout = () => {
         const productExists = customerCart.filter(item => item.product.id == selectedProduct.id);
         if(productExists.length == 0){
           let item = {
-            product : selectedProduct,  
+            product : selectedProduct,
             purchaseType : 'normal',
             quantity : selectedQuantity,
+            unitPrice : selectedProduct.price,
             total : selectedProduct.price * selectedQuantity
           }  
+          let totalCounter = totalAmount + item.total;
+          setTotalAmount(totalCounter);
           setCustomerCart(current => [...current, item]);
           console.log(customerCart);
         }
@@ -182,8 +188,34 @@ const CustomerCheckout = () => {
         setPurchaseType(event.target.value);
     };
 
-    const handleCheckoutProceed = (event) => {
-      
+    const handleCheckoutProceed = async() => {
+      try{
+
+        if(selectedCustomer!=null){
+
+          let formData = {
+            customerId : selectedCustomer.id,
+            merchantId : parseInt(window.localStorage.getItem('merchant_id')),
+            customerName : selectedCustomer.firstName,
+            totalAmount : totalAmount,
+            cart : customerCart
+          }
+
+          let response = await ApiIndex.ProductApi.productCheckout(formData);
+          setCustomerCart([]);
+          setSelectedCustomer(null);
+          setAlertType('success');
+          setAlertMessage('Purchase Record Added Successfully!');
+          setIsAlert(true);
+        }else{
+          setAlertType('error');
+          setAlertMessage('Please select a customer');
+          setIsAlert(true);
+        }
+      }
+      catch (error) {
+        console.error(error);
+      }
     }
 
     const handleChangeCategoryType = async(event) => {
@@ -210,6 +242,21 @@ const CustomerCheckout = () => {
       setOfferType(event.target.value);
     };
 
+    const handleDelete = async(id) => {
+      setCustomerCart(customerCart.filter(item => item.product.id != id))
+      await calculateTotal();
+    }
+
+    const calculateTotal = async() => {
+      var totalCounter = 0;
+      if(customerCart.length > 0){
+        customerCart.map((item) => {
+          totalCounter = totalCounter + item.total;
+        })
+        setTotalAmount(totalCounter);
+      }
+    }
+
     const cleanForm = () => {
       setState({firstName : "", lastName : "", nic : "", mobile : "", otp : ""});
     }
@@ -219,8 +266,7 @@ const CustomerCheckout = () => {
       lastName,
       nic,
       mobile,
-      otp,
-   
+      otp
     } = state;
 
 
@@ -478,6 +524,7 @@ const CustomerCheckout = () => {
                                     <TableCell align="right">Quantity</TableCell>
                                     <TableCell align="right">Amount</TableCell>
                                     <TableCell align="right">Total</TableCell>
+                                    <TableCell align="right">Remove</TableCell>
                                 </TableRow>
                             </TableHead>
                         <TableBody>
@@ -492,6 +539,7 @@ const CustomerCheckout = () => {
                                     <TableCell align="right">{item.quantity}</TableCell>
                                     <TableCell align="right">{item.quantity} &#215; {item.product.price}</TableCell>
                                     <TableCell align="right">Rs.{item.total}</TableCell>
+                                    <TableCell align="right"> <DeleteIcon onClick={()=>{handleDelete(item.product.id)}}> </DeleteIcon> </TableCell>
                                 </TableRow>
                             ))}
 
@@ -504,9 +552,12 @@ const CustomerCheckout = () => {
                     <br /><br /><br />
 
                     { customerCart.length>0 &&
-                      <Button color="success" variant="contained" size="large" style={{ float: 'right' }} onClick={handleCheckoutProceed}>
-                          Proceed
-                      </Button>
+                      <>
+                        <h3>Total Amount :  Rs. {totalAmount}</h3>
+                        <Button color="success" variant="contained" size="large" style={{ float: 'right' }} onClick={handleCheckoutProceed}>
+                            Proceed
+                        </Button>
+                      </>
                     }
 
             </SimpleCard> 
