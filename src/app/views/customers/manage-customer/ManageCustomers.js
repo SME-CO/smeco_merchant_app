@@ -26,71 +26,6 @@ import ContinuousSlider from "app/views/material-kit/slider/ContinuousSlider";
     },
   }));
   
-  // const customersList = [
-  //   {
-  //     name: "john doe",
-  //     date: "18 january, 2019",
-  //     amount: 1000,
-  //     status: "close",
-  //     company: "ABC Fintech LTD.",
-  //   },
-  //   {
-  //     name: "kessy bryan",
-  //     date: "10 january, 2019",
-  //     amount: 9000,
-  //     status: "open",
-  //     company: "My Fintech LTD.",
-  //   },
-  //   {
-  //     name: "kessy bryan",
-  //     date: "10 january, 2019",
-  //     amount: 9000,
-  //     status: "open",
-  //     company: "My Fintech LTD.",
-  //   },
-  //   {
-  //     name: "james cassegne",
-  //     date: "8 january, 2019",
-  //     amount: 5000,
-  //     status: "close",
-  //     company: "Collboy Tech LTD.",
-  //   },
-  //   {
-  //     name: "lucy brown",
-  //     date: "1 january, 2019",
-  //     amount: 89000,
-  //     status: "open",
-  //     company: "ABC Fintech LTD.",
-  //   },
-  //   {
-  //     name: "lucy brown",
-  //     date: "1 january, 2019",
-  //     amount: 89000,
-  //     status: "open",
-  //     company: "ABC Fintech LTD.",
-  //   },
-  //   {
-  //     name: "lucy brown",
-  //     date: "1 january, 2019",
-  //     amount: 89000,
-  //     status: "open",
-  //     company: "ABC Fintech LTD.",
-  //   },
-  //   {
-  //     name: "lucy brown",
-  //     date: "1 january, 2019",
-  //     amount: 89000,
-  //     status: "open",
-  //     company: "ABC Fintech LTD.",
-  //   },
-  //   {
-  //     name: "lucy brown",
-  //     date: "1 january, 2019",
-  //     amount: 89000,
-  //     status: "open",
-  //     company: "ABC Fintech LTD.",
-  //   },
-  // ];
   
   const ManageCustomers = () => {
     const [page, setPage] = useState(0);
@@ -119,7 +54,7 @@ import ContinuousSlider from "app/views/material-kit/slider/ContinuousSlider";
 
     useEffect(() => {
         getCustomers();
-    });
+    },[]);
   
     return (
       <SimpleCard title="Manage your customers here">

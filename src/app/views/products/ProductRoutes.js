@@ -4,6 +4,7 @@ import { lazy } from 'react';
 const NewProduct = Loadable(lazy(() => import('./new-product/NewProduct')));
 const ManageProduct = Loadable(lazy(() => import('./manage-product/ManageProduct')));
 const NewPromotion = Loadable(lazy(() => import('./promotions/NewPromotion')));
+const SalesReport = Loadable(lazy(() => import('./reports/SalesReport')));
 
 const productRoutes = [
     {
@@ -17,7 +18,11 @@ const productRoutes = [
     {
         path: 'products/promotions/new',
         element: <NewPromotion/>
-    }
+    },
+    {
+        path: 'reports',
+        element: <SalesReport/>
+    },
 ];
 
 export default productRoutes;
