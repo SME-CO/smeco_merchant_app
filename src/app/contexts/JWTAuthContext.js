@@ -22,6 +22,7 @@ const setSession = (accessToken) => {
     } else {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('role')
+        localStorage.removeItem('merchant_id')
         delete axios.defaults.headers.common.Authorization
     }
 }
@@ -94,7 +95,8 @@ export const AuthProvider = ({ children }) => {
         
 
         setSession(accessToken);
-        localStorage.setItem('role', response.data.role)
+        localStorage.setItem('role', response.data.role);
+        localStorage.setItem('merchant_id', response.data.user.id);
 
         dispatch({
             type: 'LOGIN',

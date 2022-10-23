@@ -94,6 +94,7 @@ const Sidenav = ({ children }) => {
               
             ],
           },
+          { name: 'Sales Reports', path: '/reports', icon: 'dashboard' },
           // {
           //   name: 'Session/Auth',
           //   icon: 'security',
