@@ -1,30 +1,102 @@
-import React from 'react'
-import { Disclosure } from '@headlessui/react'
-import { ChevronUpIcon } from '@heroicons/react/solid'
-import TextField from "@mui/material/TextField";
-import Box from "@mui/material/Box";
+import {
+  Box,
+  Icon,
+  IconButton,
+  styled,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+} from "@mui/material";
+import { useState, useEffect } from "react";
+import { SimpleCard } from "app/components";
+import ApiIndex from "../../../api/index";
+import Modal from "./modal";
 
+const StyledTable = styled(Table)(() => ({
+  whiteSpace: "pre",
+  "& thead": {
+    "& tr": { "& th": { paddingLeft: 0, paddingRight: 0 } },
+  },
+  "& tbody": {
+    "& tr": { "& td": { paddingLeft: 0, textTransform: "capitalize" } },
+  },
+}));
 
+const Faq = () => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const faq = () => {
+  const [faqList, setFaqList] = useState([]);
+
+  const handleChangePage = (_, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+  const getFaq = async () => {
+    try {
+        const response = await ApiIndex.FaqApi.getFaq();
+        setFaqList(response.data);
+        console.log(response.data);
+    }
+    catch (error) {
+      console.error(error);
+    }
+  } 
+
+  useEffect(() => {
+      getFaq();
+  });
+
   return (
-    <div className='pl-12'>
-      <div className='pl-24 pr-12'>
-        <h1>Answers for your Queries...</h1>
-        {/* <Box
-          component="form"
-          noValidate
-          onSubmit={handleSubmit}
-          sx={{ mt: 1 }}
-        > */}
-          <TextField className='bg-[#F0F8FF] font-white align-items-center' name="message" fullWidth></TextField>
-          <div className='pt-3'>
-            <button className='border-none px-4 py-1'>SUBMIT</button>
-          </div>
-        {/* </Box> */}
-      </div>
-    </div>
-  )
-}
+    <SimpleCard title="Answers for Customer Queries">
+        <Box width="97%" overflow="auto">
+          <StyledTable>
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">Questions</TableCell>
+                <TableCell align="center">Answer</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {faqList && faqList
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((faq, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="left">{faq.message}</TableCell>
+                    <TableCell align="center">
+                      {/* <IconButton>
+                        <Icon color="primary">edit</Icon>
+                      </IconButton> */}
+                       <Modal />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                 
+            </TableBody>
+          </StyledTable>
+          <TablePagination
+            sx={{ px: 2 }}
+            page={page}
+            component="div"
+            rowsPerPage={rowsPerPage}
+            count={5}
+            onPageChange={handleChangePage}
+            rowsPerPageOptions={[5, 10, 25]}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            nextIconButtonProps={{ "aria-label": "Next Page" }}
+            backIconButtonProps={{ "aria-label": "Previous Page" }}
+          />
+        </Box>
+    </SimpleCard>
+  );
+};
 
-export default faq
+export default Faq;

@@ -117,6 +117,33 @@ const data = {
       ],
    };
 
+   const data2 = {
+    labels: ["Top Choice", "Glitters", "Shoe Palace", "Fashion Wings","Stylish", "Your Choice"],
+    datasets: [
+       {
+          label:'Customers Count',
+          data: [12, 40, 20, 25, 5, 18],
+          backgroundColor: [
+             'rgba(255, 99, 132, 0.2)',
+             'rgba(54, 162, 235, 0.2)',
+             'rgba(255, 206, 86, 0.2)',
+             'rgba(75, 192, 192, 0.2)',
+             'rgba(153, 102, 255, 0.2)',
+             'rgba(255, 159, 64, 0.2)'
+          ],
+          borderColor: [
+             'rgba(255, 99, 132)',
+             'rgba(54, 162, 235)',
+             'rgba(255, 206, 86)',
+             'rgba(75, 192, 192)',
+             'rgba(153, 102, 255)',
+             'rgba(255, 159, 64)'
+          ],
+          borderWidth: 1
+       },
+    ],
+ };
+
 const Analytics = () => {
   const { palette } = useTheme();
 
@@ -124,9 +151,23 @@ const Analytics = () => {
     <Fragment>
       <ContentBox className="analytics">
         <Grid container spacing={3}>
-          <Grid item lg={8} md={8} sm={12} xs={12}>
+          {/* <Grid item lg={8} md={8} sm={12} xs={12}> */}
             <StatCards />
-          </Grid>
+            <div>
+                <div style={{ width: "600px", margin: "0 auto" }}>
+                    <Bar data={data2} />
+                </div>
+              </div>
+
+            
+
+              <div className='pr-24'>
+               <div style={{ width: "400px", margin: "0 auto" }}>
+                  <Doughnut data={data} />
+               </div>
+            </div>
+
+          {/* </Grid> */}
         </Grid>
       </ContentBox>
     </Fragment>
