@@ -57,13 +57,15 @@ const Sidenav = ({ children }) => {
               { name: 'Registered Customers', iconText: 'SI', path: 'admin/all-customers' },
               { name: 'Registered Merchants', iconText: 'SU', path: 'admin/all-merchants' },
             ],
-          }
+          },
+          { name: 'FAQs', path: '/dashboard/faq', icon: 'message' }
       ]
       setNavigations(navigation_contents);
     }
 
     if(window.localStorage.getItem('role') == 'merchant'){
       navigation_contents = [
+          { name: 'Dashboard', path: '/dashboard/merchant', icon: 'Quiz' },
           { name: 'Dashboard', path: '/dashboard/merchant', icon: 'dashboard' },
           { name: 'Checkout Customer', path: '/checkout', icon: 'dashboard' },
           {
@@ -92,6 +94,7 @@ const Sidenav = ({ children }) => {
               
             ],
           },
+          { name: 'Sales Reports', path: '/reports', icon: 'dashboard' },
           // {
           //   name: 'Session/Auth',
           //   icon: 'security',

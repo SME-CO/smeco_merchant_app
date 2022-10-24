@@ -17,6 +17,7 @@ import {
     TableHead,
     TableRow,
     Paper,
+    Autocomplete
   } from "@mui/material";
 import { Span } from "app/components/Typography";
 import { useEffect, useState } from "react";
@@ -71,14 +72,17 @@ const CustomerCheckout = () => {
     const [isAlert, setIsAlert] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState('');
     const [alertType, setAlertType] = React.useState('');
-    const [purchaseType, setPurchaseType] = React.useState('');
+    const [purchaseType, setPurchaseType] = React.useState('normal');
     const [offerType, setOfferType] = React.useState('');
     const [productsList, setProductList] = useState([]);
     const [selectedCategory, setCategory] = useState('');
     const [productBundle, setProductBundle] = useState([]);
     const [customerCart, setCustomerCart] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState({});
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedQuantity, setSelectedQuantity] = useState(0);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [customers, setCustomers] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
   
     const hideAlert = () => {
       if(isAlert){
@@ -89,7 +93,9 @@ const CustomerCheckout = () => {
     useEffect(async () => {
       hideAlert();
       await syncProductsByCategory(selectedCategory);
-    }, [selectedCategory, productBundle]);
+      await getCustomers();
+      await calculateTotal();
+    }, [selectedCategory, productBundle, selectedCustomer, totalAmount, customerCart]);
 
     const handleSubmit = async () => {
       try {
@@ -121,6 +127,26 @@ const CustomerCheckout = () => {
         setIsAlert(true);
       }
     };
+
+    const getCustomers = async () => {
+      try {
+          const response = await ApiIndex.CustomerApi.getCustomers();
+          let customerList = response.data;
+          customerList.forEach(customer => {
+            customer.label = `${customer.firstName} - ${customer.mobile}`
+          });
+          setCustomers(customerList);
+          console.log(customers);
+      }
+      catch (error) {
+        console.error(error);
+      }
+    } 
+
+    const handleCustomerSearch = (event, values) => {
+      setSelectedCustomer(values);
+      console.log(values);
+    }
   
     const handleChange = (event) => {
       setState({ ...state, [event.target.name]: event.target.value });
@@ -128,15 +154,18 @@ const CustomerCheckout = () => {
     };
 
     const handleAddProductToCart = () => {
-      if(selectedQuantity > 0){
+      if(selectedQuantity > 0 && selectedProduct!=null){
         const productExists = customerCart.filter(item => item.product.id == selectedProduct.id);
         if(productExists.length == 0){
           let item = {
-            product : selectedProduct,  
+            product : selectedProduct,
             purchaseType : 'normal',
             quantity : selectedQuantity,
+            unitPrice : selectedProduct.price,
             total : selectedProduct.price * selectedQuantity
           }  
+          let totalCounter = totalAmount + item.total;
+          setTotalAmount(totalCounter);
           setCustomerCart(current => [...current, item]);
           console.log(customerCart);
         }
@@ -159,9 +188,40 @@ const CustomerCheckout = () => {
         setPurchaseType(event.target.value);
     };
 
+    const handleCheckoutProceed = async() => {
+      try{
+
+        if(selectedCustomer!=null){
+
+          let formData = {
+            customerId : selectedCustomer.id,
+            merchantId : parseInt(window.localStorage.getItem('merchant_id')),
+            customerName : selectedCustomer.firstName,
+            totalAmount : totalAmount,
+            cart : customerCart
+          }
+
+          let response = await ApiIndex.ProductApi.productCheckout(formData);
+          setCustomerCart([]);
+          setSelectedCustomer(null);
+          setAlertType('success');
+          setAlertMessage('Purchase Record Added Successfully!');
+          setIsAlert(true);
+        }else{
+          setAlertType('error');
+          setAlertMessage('Please select a customer');
+          setIsAlert(true);
+        }
+      }
+      catch (error) {
+        console.error(error);
+      }
+    }
+
     const handleChangeCategoryType = async(event) => {
       try {
         setCategory(event.target.value);
+        setSelectedProduct(null);
        }
       catch (error) {
         console.error(error);
@@ -181,6 +241,21 @@ const CustomerCheckout = () => {
     const handleChangeOfferType = (event) => {
       setOfferType(event.target.value);
     };
+
+    const handleDelete = async(id) => {
+      setCustomerCart(customerCart.filter(item => item.product.id != id))
+      await calculateTotal();
+    }
+
+    const calculateTotal = async() => {
+      var totalCounter = 0;
+      if(customerCart.length > 0){
+        customerCart.map((item) => {
+          totalCounter = totalCounter + item.total;
+        })
+        setTotalAmount(totalCounter);
+      }
+    }
 
     const cleanForm = () => {
       setState({firstName : "", lastName : "", nic : "", mobile : "", otp : ""});
@@ -208,23 +283,21 @@ const CustomerCheckout = () => {
 
             <Grid container alignItems="center" justifyContent="center" style={{ minHeight: '11vh' }}>
               <Grid item xs={12}>
-                <SimpleCard title="Select Customer" >
+                <SimpleCard  >
                     <Box sx={{ minWidth: 120 }}>
 
                         <Grid container spacing={9}>
                             <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel id="demo-simple-select-label">Search Customer By Mobile No.</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        name="offerType"
-                                        label="Offer Type"
-                                        onChange={handleChangeCategoryType}
-                                        >
-                                        
-                                    </Select>
-                                </FormControl>
+                                 <ValidatorForm fullWidth>
+                                    <Autocomplete
+                                      disablePortal
+                                      id="combo-box-demo"
+                                      options={customers}
+                                      sx={{ width: 300 }}
+                                      onChange={handleCustomerSearch}
+                                      renderInput={(params) => <TextField {...params} label="Search Customer" />}
+                                    />
+                                 </ValidatorForm>
                             </Grid>
 
                             <Grid item xs={6}>
@@ -240,82 +313,197 @@ const CustomerCheckout = () => {
                                         <MenuItem value='normal'>Normal</MenuItem>
                                         <MenuItem value='bundle_offers'>Bundle Offers</MenuItem>
                                         <MenuItem value='couple_offers'>Couple Offers</MenuItem>
-                                        {/* <MenuItem value='couple_offers'>Couple Offers</MenuItem> */}
                                     </Select>
                                 </FormControl>
                             </Grid>
                         </Grid>
 
-                        <br />
-                        <Heading>Add Customer Products</Heading>
+                        <br />      
                         
+                    { purchaseType == 'normal' &&
+                        <div>
+                          <Heading>Add Customer Products</Heading>
+                          <Grid container spacing={1}>
+                          
+                              <Grid item xs={3}>
+                                  <FormControl fullWidth>
+                                      <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                                      <Select
+                                          labelId="demo-simple-select-label"
+                                          id="demo-simple-select"
+                                          name="offerType"
+                                          label="Offer Type"
+                                          onChange={handleChangeCategoryType}
+                                          >
+                                          <MenuItem value='Appliances'>Appliances</MenuItem>
+                                          <MenuItem value='Automotive Parts'>Automotive Parts</MenuItem>
+                                          <MenuItem value='Beauty'>Beauty</MenuItem>
+                                          <MenuItem value='Cell Phones & Accessories'>Cell Phones & Accessories</MenuItem>
+                                          <MenuItem value='Garden'>Garden & Outdoor</MenuItem>
+                                          <MenuItem value='Toys & Games'>Toys & Games</MenuItem>
+                                          <MenuItem value='Home & Kitchen'>Home & Kitchen</MenuItem>
+                                          <MenuItem value='Baby'>Baby</MenuItem>
+                                          <MenuItem value='Arts, Crafts & Sewing'>Arts, Crafts & Sewing</MenuItem>
+                                      </Select>
+                                  </FormControl>
+                              </Grid>
 
-                        <Grid container spacing={1}>
-                        
-                            <Grid item xs={3}>
-                                <FormControl fullWidth>
-                                    <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        name="offerType"
-                                        label="Offer Type"
-                                        onChange={handleChangeCategoryType}
-                                        >
-                                        <MenuItem value='Appliances'>Appliances</MenuItem>
-                                        <MenuItem value='Automotive Parts'>Automotive Parts</MenuItem>
-                                        <MenuItem value='Beauty'>Beauty</MenuItem>
-                                        <MenuItem value='Cell Phones & Accessories'>Cell Phones & Accessories</MenuItem>
-                                        <MenuItem value='Garden'>Garden & Outdoor</MenuItem>
-                                        <MenuItem value='Toys & Games'>Toys & Games</MenuItem>
-                                        <MenuItem value='Home & Kitchen'>Home & Kitchen</MenuItem>
-                                        <MenuItem value='Baby'>Baby</MenuItem>
-                                        <MenuItem value='Arts, Crafts & Sewing'>Arts, Crafts & Sewing</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
+                              <Grid item xs={3}>
+                                  <FormControl fullWidth>
+                                      <InputLabel id="demo-simple-select-label">Product</InputLabel>
+                                      <Select
+                                          labelId="demo-simple-select-label"
+                                          id="demo-simple-select"
+                                          name="offerType"
+                                          label="Offer Type"
+                                          onChange={handleProductChange}
+                                          >
+                                          { 
+                                              productsList && productsList
+                                                  .map((product, index) => (
+                                              <MenuItem value={product}>{product.productName}</MenuItem>
+                                              ))
+                                          }
+                                      </Select>
+                                  </FormControl>
+                              </Grid>
 
-                            <Grid item xs={3}>
-                                <FormControl fullWidth>
-                                    <InputLabel id="demo-simple-select-label">Product</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        name="offerType"
-                                        label="Offer Type"
-                                        onChange={handleProductChange}
-                                        >
-                                        { 
-                                            productsList && productsList
-                                                .map((product, index) => (
-                                            <MenuItem value={product}>{product.productName}</MenuItem>
-                                            ))
-                                        }
-                                    </Select>
-                                </FormControl>
-                            </Grid>
+                              <Grid item xs={3}>
+                                  <ValidatorForm>
+                                      <TextField
+                                          type="number"
+                                          name="quantity"
+                                          label="Quantity"
+                                          onChange={handleQuantityChange}
+                                      />
+                                  </ValidatorForm>    
+                              </Grid>
 
-                            <Grid item xs={3}>
-                                <ValidatorForm>
-                                    <TextField
-                                        type="number"
-                                        name="quantity"
-                                        label="Quantity"
-                                        onChange={handleQuantityChange}
-                                    />
-                                </ValidatorForm>    
-                            </Grid>
+                              <Grid item xs={3}>
+                                  
+                              </Grid>
 
-                            <Grid item xs={3}>
-                                
-                            </Grid>
+                              <Grid item xs={2}>
+                                <Button color="primary" variant="contained" size="large"  onClick={handleAddProductToCart}>
+                                    Add Product
+                                </Button>
+                              </Grid>
+                          </Grid> 
+                        </div>
+                        }
 
-                            <Grid item xs={2}>
-                              <Button color="primary" variant="contained" size="large"  onClick={handleAddProductToCart}>
-                                  Add Product
-                              </Button>
-                            </Grid>
-                        </Grid>
+                    { purchaseType == 'bundle_offers' &&
+
+                        <div>
+                          <Heading>Add Customer Offers</Heading>
+                          <Grid container spacing={1}>
+                          
+                              <Grid item xs={3}>
+                                  <FormControl fullWidth>
+                                      <InputLabel id="demo-simple-select-label">Bundle Offers</InputLabel>
+                                      <Select
+                                          labelId="demo-simple-select-label"
+                                          id="demo-simple-select"
+                                          name="offerType"
+                                          label="Offer Type"
+                                          onChange={handleChangeCategoryType}
+                                          >
+                                          <MenuItem value='Appliances'>Appliances</MenuItem>
+                                          <MenuItem value='Automotive Parts'>Automotive Parts</MenuItem>
+                                          <MenuItem value='Beauty'>Beauty</MenuItem>
+                                          <MenuItem value='Cell Phones & Accessories'>Cell Phones & Accessories</MenuItem>
+                                          <MenuItem value='Garden'>Garden & Outdoor</MenuItem>
+                                          <MenuItem value='Toys & Games'>Toys & Games</MenuItem>
+                                          <MenuItem value='Home & Kitchen'>Home & Kitchen</MenuItem>
+                                          <MenuItem value='Baby'>Baby</MenuItem>
+                                          <MenuItem value='Arts, Crafts & Sewing'>Arts, Crafts & Sewing</MenuItem>
+                                      </Select>
+                                  </FormControl>
+                              </Grid>
+
+                              <Grid item xs={3}>
+                                  <ValidatorForm>
+                                      <TextField
+                                          type="number"
+                                          name="quantity"
+                                          label="Quantity"
+                                          onChange={handleQuantityChange}
+                                      />
+                                  </ValidatorForm>    
+                              </Grid>
+
+                              <Grid item xs={3}>
+                                  
+                              </Grid>
+
+                              <Grid item xs={3}>
+                                  
+                              </Grid>
+
+                              <Grid item xs={2}>
+                                <Button color="primary" variant="contained" size="large"  onClick={handleAddProductToCart}>
+                                    Add Offer
+                                </Button>
+                              </Grid>
+                          </Grid>
+                        </div>
+                        }
+
+                  { purchaseType == 'couple_offers' &&
+                        <div>
+                          <Heading>Add Customer Offers</Heading>
+                          <Grid container spacing={1}>
+                          
+                              <Grid item xs={3}>
+                                  <FormControl fullWidth>
+                                      <InputLabel id="demo-simple-select-label">Couple Offers</InputLabel>
+                                      <Select
+                                          labelId="demo-simple-select-label"
+                                          id="demo-simple-select"
+                                          name="offerType"
+                                          label="Offer Type"
+                                          onChange={handleChangeCategoryType}
+                                          >
+                                          <MenuItem value='Appliances'>Appliances</MenuItem>
+                                          <MenuItem value='Automotive Parts'>Automotive Parts</MenuItem>
+                                          <MenuItem value='Beauty'>Beauty</MenuItem>
+                                          <MenuItem value='Cell Phones & Accessories'>Cell Phones & Accessories</MenuItem>
+                                          <MenuItem value='Garden'>Garden & Outdoor</MenuItem>
+                                          <MenuItem value='Toys & Games'>Toys & Games</MenuItem>
+                                          <MenuItem value='Home & Kitchen'>Home & Kitchen</MenuItem>
+                                          <MenuItem value='Baby'>Baby</MenuItem>
+                                          <MenuItem value='Arts, Crafts & Sewing'>Arts, Crafts & Sewing</MenuItem>
+                                      </Select>
+                                  </FormControl>
+                              </Grid>
+
+                              <Grid item xs={3}>
+                                  <ValidatorForm>
+                                      <TextField
+                                          type="number"
+                                          name="quantity"
+                                          label="Quantity"
+                                          onChange={handleQuantityChange}
+                                      />
+                                  </ValidatorForm>    
+                              </Grid>
+
+                              <Grid item xs={3}>
+                                  
+                              </Grid>
+
+                              <Grid item xs={3}>
+                                  
+                              </Grid>
+
+                              <Grid item xs={2}>
+                                <Button color="primary" variant="contained" size="large"  onClick={handleAddProductToCart}>
+                                    Add Offer
+                                </Button>
+                              </Grid>
+                          </Grid> 
+                        </div>
+                        }
 
                     
                     </Box>
@@ -336,6 +524,7 @@ const CustomerCheckout = () => {
                                     <TableCell align="right">Quantity</TableCell>
                                     <TableCell align="right">Amount</TableCell>
                                     <TableCell align="right">Total</TableCell>
+                                    <TableCell align="right">Remove</TableCell>
                                 </TableRow>
                             </TableHead>
                         <TableBody>
@@ -350,6 +539,7 @@ const CustomerCheckout = () => {
                                     <TableCell align="right">{item.quantity}</TableCell>
                                     <TableCell align="right">{item.quantity} &#215; {item.product.price}</TableCell>
                                     <TableCell align="right">Rs.{item.total}</TableCell>
+                                    <TableCell align="right"> <DeleteIcon onClick={()=>{handleDelete(item.product.id)}}> </DeleteIcon> </TableCell>
                                 </TableRow>
                             ))}
 
@@ -358,6 +548,17 @@ const CustomerCheckout = () => {
                         
                     </Table>
                     {/* </TableContainer> */}
+
+                    <br /><br /><br />
+
+                    { customerCart.length>0 &&
+                      <>
+                        <h3>Total Amount :  Rs. {totalAmount}</h3>
+                        <Button color="success" variant="contained" size="large" style={{ float: 'right' }} onClick={handleCheckoutProceed}>
+                            Proceed
+                        </Button>
+                      </>
+                    }
 
             </SimpleCard> 
         </Container>

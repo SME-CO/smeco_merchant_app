@@ -69,6 +69,11 @@ const ContentBox = styled('div')(({ theme }) => ({
   [theme.breakpoints.down('sm')]: { margin: '16px' },
 }));
 
+const ContentBox2 = styled('div')(({ theme }) => ({
+   margin: '30px',
+   [theme.breakpoints.down('sm')]: { margin: '16px' },
+ }));
+
 const Title = styled('span')(() => ({
   fontSize: '1rem',
   fontWeight: '500',
@@ -78,7 +83,7 @@ const Title = styled('span')(() => ({
 
 //doughnut chart
 const data = {
-  labels: ["Top Choice", "Glitters", "Shoe Palace", "Fashion Wings","Stylish", "Your Choice"],
+  labels: ["T-shirt", "Shirt", "Trouser", "belt","skirts", "Tops"],
   datasets: [
      {
         label:'Offer Count',
@@ -107,7 +112,7 @@ const data = {
 
 //bar chart
 const data2 = {
-  labels: ["Toys", "Cloths", "Shoes", "Sports","Outdoor", "Garden"],
+  labels: ["T-shirt", "Shirt", "Trouser", "belt","skirts", "Tops"],
   datasets: [
      {
         label:'Items in Store',
@@ -133,34 +138,8 @@ const data2 = {
   ],
 };
 
-//line
-const data3 = {
-  labels: ["Top Choice", "Glitters", "Shoe Palace", "Stylish", "Your Choice", "Fashion Wings",],
-  datasets: [
-     {
-        label:'Offer Count',
-        data: [20, 6, 80, 30, 60, 15],
-        backgroundColor: [
-           'rgba(255, 99, 132, 0.2)',
-           'rgba(54, 162, 235, 0.2)',
-           'rgba(255, 206, 86, 0.2)',
-           'rgba(75, 192, 192, 0.2)',
-           'rgba(153, 102, 255, 0.2)',
-           'rgba(255, 159, 64, 0.2)'
-        ],
-        borderColor: [
-           'rgba(255, 99, 132)',
-           'rgba(54, 162, 235)',
-           'rgba(255, 206, 86)',
-           'rgba(75, 192, 192)',
-           'rgba(153, 102, 255)',
-           'rgba(255, 159, 64)'
-        ],
-        borderWidth: 1
-     },
-  ],
-};
 
+   
 const SubTitle = styled('span')(({ theme }) => ({
   fontSize: '0.875rem',
   color: theme.palette.text.secondary,
@@ -181,22 +160,22 @@ const Analytics = () => {
     <Fragment>
       <ContentBox className="analytics">
         <Grid container spacing={3}>
-          <Grid item lg={8} md={8} sm={12} xs={12}>
-            <StatCards2 />
+          {/* <Grid item lg={8} md={8} sm={12} xs={12}> */}
+            {/* <StatCards2 /> */}
 
 
 
               {/* --------------------Bar chart----------------------- */}
               <div>
-                <div style={{ width: "600px", margin: "0 auto" }}>
+              <StatCards2 />
+                <div style={{ width: "500px", margin: "0 auto" }}>
                     <Bar data={data2} />
                 </div>
               </div>
-
-              <br /><br /><br /><br /> <br />
-
+                  
+         
               <div className='pr-24'>
-               <div style={{ width: "400px", margin: "0 auto" }}>
+               <div style={{ width: "500px", margin: "0 auto" }}>
                   <Doughnut data={data} />
                </div>
             </div>
@@ -205,7 +184,7 @@ const Analytics = () => {
 
 
           </Grid>
-        </Grid>
+        {/* </Grid> */}
       </ContentBox>
     </Fragment>
   );

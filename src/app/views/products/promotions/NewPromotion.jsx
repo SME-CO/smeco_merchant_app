@@ -33,6 +33,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
+import { isEmpty } from "lodash";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -75,9 +76,8 @@ const NewPromotion = () => {
     const [productsList, setProductList] = useState([]);
     const [selectedCategory, setCategory] = useState('');
     const [productBundle, setProductBundle] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState({});
+    const [selectedProduct, setSelectedProduct] = useState(null);
   
-
     const hideAlert = () => {
       if(isAlert){
         setTimeout(() => {setIsAlert(false)}, 3000);
@@ -87,24 +87,84 @@ const NewPromotion = () => {
     useEffect(async () => {
       hideAlert();
       await syncProductsByCategory(selectedCategory);
-    }, [selectedCategory, productBundle]);
+    }, [selectedCategory, productBundle, selectedProduct, isAlert]);
 
     const handleSubmit = async () => {
       try {
+        switch(promotionType){
+          case 'offer' : 
 
-        const formData = {
-            firstName : state.firstName,
-            lastName : state.lastName,
-            nic: state.nic,
-            mobile: state.mobile,
-            otp : state.otp
+            switch(offerType){
+              case 'buyGet' :
+                console.log(selectedProduct)
+                if(selectedProduct!=null && state.buyQuantity != '' && state.getQuantity != ''){
+                  console.log(selectedProduct);
+
+                  let formData = {
+                    productId : selectedProduct.id,
+                    merchantId : parseInt(window.localStorage.getItem('merchant_id')),
+                    buyQuantity : state.buyQuantity,
+                    getQuantity : state.getQuantity 
+                  }
+
+                  console.log(formData)
+
+                  let response = await ApiIndex.OfferApi.createBuyGetOffer(formData);
+                  setAlertType('success');
+                  setAlertMessage('Buy Get Offer Successfully Created!');
+                  setIsAlert(true);
+                  setOfferType('');
+
+                }else{
+                  setAlertType('error');
+                  setAlertMessage('Please fill all required fields');
+                  setIsAlert(true);
+                }
+                break;
+
+                case 'bundle' : {
+                    console.log("came")
+                    if(state.bundleName != '' && state.bundlePrice != '' ){
+                      if(productBundle.length!=0){
+                        console.log("came inside")
+                        let productIds = productBundle.map(item => item.id);
+    
+                        let formData = {
+                          productIds : productIds,
+                          merchantId : parseInt(window.localStorage.getItem('merchant_id')),
+                          name : state.bundleName,
+                          price : state.bundlePrice 
+                        }
+
+                        console.log(formData);
+    
+                        let response = await ApiIndex.OfferApi.createBundleOffer(formData);
+                        setAlertType('success');
+                        setAlertMessage('Bundle Offer Successfully Created!');
+                        setIsAlert(true);
+                        setOfferType('');
+                        cleanForm();
+                        setProductBundle([]);
+    
+                      }else{
+                        setAlertType('error');
+                        setAlertMessage('Please Add products to create a bundle');
+                        setIsAlert(true);
+                      }
+                    }else{
+                      setAlertType('error');
+                      setAlertMessage('Please fill all required fields');
+                      setIsAlert(true);
+                    }  
+                }
+
+            }
+            break;
+
+            
         }
-
-        const response = await ApiIndex.CustomerApi.createCustomer(formData);
-        setAlertType('success');
-        setAlertMessage('Cutomer created sucessfully');
-        setIsAlert(true);
-        cleanForm();
+        
+        
       } catch (error) {
         console.log(error);
         setAlertType('error');
@@ -119,6 +179,13 @@ const NewPromotion = () => {
         setIsAlert(true);
       }
     };
+
+    const handleChangeProduct = (event) => {
+      let productId = event.target.value;
+      let filtered = productsList.filter((item) => item.id == productId);
+      console.log(filtered)
+      setSelectedProduct(filtered[0]);
+    }
   
     const handleChange = (event) => {
       setState({ ...state, [event.target.name]: event.target.value });
@@ -126,11 +193,17 @@ const NewPromotion = () => {
     };
 
     const handleAddProduct = () => {
-      if(productBundle){
-        const productExists = productBundle.filter(product => product.id == selectedProduct.id);
-        if(productExists.length==0){
-          setProductBundle(current => [...current, selectedProduct]);
+      if(selectedProduct != null){
+        if(productBundle){
+          const productExists = productBundle.filter(product => product.id == selectedProduct.id);
+          if(productExists.length==0){
+            setProductBundle(current => [...current, selectedProduct]);
+          }
         }
+      }else{
+        setAlertType('error');
+        setAlertMessage('Please Select A product to Add');
+        setIsAlert(true);
       }
     }
 
@@ -139,7 +212,10 @@ const NewPromotion = () => {
     }
 
     const handleBundleProductChange = (event) => {
-      setSelectedProduct(event.target.value);
+      let productId = event.target.value;
+      let filtered = productsList.filter((item) => item.id == productId);
+      console.log(filtered[0])
+      setSelectedProduct(filtered[0]);
     }
     
 
@@ -150,7 +226,6 @@ const NewPromotion = () => {
     const handleChangeCategoryType = async(event) => {
       try {
         setCategory(event.target.value);
-        console.log(selectedCategory);
        }
       catch (error) {
         console.error(error);
@@ -172,15 +247,15 @@ const NewPromotion = () => {
     };
 
     const cleanForm = () => {
-      setState({firstName : "", lastName : "", nic : "", mobile : "", otp : ""});
+      setState({ discountPercentage : '', bundleName: '', bundlePrice: ''});
     }
 
     const {
-      firstName,
-      lastName,
-      nic,
-      mobile,
-      otp
+      getQuantity,
+      buyQuantity,
+      discountPercentage,
+      bundlePrice,
+      bundleName
     } = state;
 
 
@@ -207,6 +282,7 @@ const NewPromotion = () => {
                                 name="offerType"
                                 label="Offer Type"
                                 onChange={handleChangeType}
+                                value={promotionType}
                                 >
                                 <MenuItem value='offer'>Offer</MenuItem>
                                 <MenuItem value='discount'>Discount</MenuItem>
@@ -233,6 +309,7 @@ const NewPromotion = () => {
                                     name="offerType"
                                     label="Offer Type"
                                     onChange={handleChangeOfferType}
+                                    value={offerType}
                                     >
                                     <MenuItem value='buyGet'>Buy Get Offer</MenuItem>
                                     <MenuItem value='bundle'>Bundle Offer</MenuItem>
@@ -280,12 +357,13 @@ const NewPromotion = () => {
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    name="offerType"
-                                    label="Offer Type"
+                                    name="buyQuantity"
+                                    onChange={handleChange}
+                                    label="Buy Quantity"
                                     >
-                                    <MenuItem value='buyGet'>1</MenuItem>
-                                    <MenuItem value='bundle'>2</MenuItem>
-                                    <MenuItem value='couple'>3</MenuItem>
+                                    <MenuItem value={1}>1</MenuItem>
+                                    <MenuItem value={2}>2</MenuItem>
+                                    <MenuItem value={3}>3</MenuItem>
                                 </Select>
                           </FormControl>
                       </Grid>
@@ -296,14 +374,14 @@ const NewPromotion = () => {
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    name="offerType"
                                     label="Offer Type"
+                                    onChange={handleChangeProduct}
                                     >
 
                                     { 
                                       productsList && productsList
                                       .map((product, index) => (
-                                      <MenuItem value={product.productName}>{product.productName}</MenuItem>
+                                      <MenuItem value={product.id}>{product.productName}</MenuItem>
                                       ))
                                     }
                                 </Select>
@@ -316,12 +394,13 @@ const NewPromotion = () => {
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    name="offerType"
-                                    label="Offer Type"
+                                    name="getQuantity"
+                                    onChange={handleChange}
+                                    label="Get Quantity"
                                     >
-                                    <MenuItem value='buyGet'>1</MenuItem>
-                                    <MenuItem value='bundle'>2</MenuItem>
-                                    <MenuItem value='couple'>3</MenuItem>
+                                    <MenuItem value={1}>1</MenuItem>
+                                    <MenuItem value={2}>2</MenuItem>
+                                    <MenuItem value={3}>3</MenuItem>
                                 </Select>
                           </FormControl>
                       </Grid>
@@ -336,8 +415,20 @@ const NewPromotion = () => {
 
                  { offerType=='bundle' && <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
                     <h5>Bundle Offer</h5>
-                    <Grid container spacing={6}>
 
+                    <Grid container spacing={6}>
+                      <Grid item xs={6}>
+                        <TextField
+                              type="text"
+                              name="bundleName"
+                              value={bundleName || ""}
+                              label="Bundle Name"
+                              onChange={handleChange}
+                          />
+                        </Grid>
+                      </Grid>
+      
+                    <Grid container spacing={6}>
                       <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
                         <br />
                         <FormControl fullWidth>
@@ -378,7 +469,7 @@ const NewPromotion = () => {
                                         { 
                                           productsList && productsList
                                           .map((product, index) => (
-                                          <MenuItem value={product}>{product.productName}</MenuItem>
+                                            <MenuItem value={product.id}>{product.productName}</MenuItem>
                                           ))
                                         }
                                     </Select>
@@ -422,7 +513,8 @@ const NewPromotion = () => {
                                       </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
-                                      primary={product.productName}
+
+                                      primary={product.productName + ' - Rs. ' + product.price}
                                       secondary='Secondary'
                                     />
                                 </ListItem>
@@ -432,6 +524,21 @@ const NewPromotion = () => {
                       </Grid> 
 
                     </Grid>
+                    <br /><br /><br /><br />
+
+                    <Grid container spacing={4}>
+                      <Grid item xs={6}>
+                        <TextField
+                              type="number"
+                              name="bundlePrice"
+                              value={bundlePrice || ""}
+                              label="Price"
+                              onChange={handleChange}
+                          />
+                        </Grid>
+                      </Grid>
+                    
+                    
                     <br />
                     <Button color="primary" variant="contained" type="submit">
                         <Icon>send</Icon>
@@ -593,8 +700,8 @@ const NewPromotion = () => {
                         <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
                         <TextField
                             type="text"
-                            name="lastName"
-                            value={lastName || ""}
+                            name="discountPercentage"
+                            value={discountPercentage || ""}
                             label="Discount Percentage"
                             onChange={handleChange}
                         />
@@ -626,7 +733,6 @@ const NewPromotion = () => {
                             type="date"
                             name="otp"
                             label="Start Date"
-                            value={otp || ""}
                             onChange={handleChange}
                             validators={["required"]}
                             errorMessages={["this field is required"]}
@@ -636,7 +742,6 @@ const NewPromotion = () => {
                             type="number"
                             name="otp"
                             label="Reward Eligible Limit"
-                            value={otp || ""}
                             onChange={handleChange}
                             validators={["required"]}
                             errorMessages={["this field is required"]}
@@ -646,8 +751,6 @@ const NewPromotion = () => {
                         <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
                         <TextField
                             type="date"
-                            name="lastName"
-                            value={lastName || ""}
                             label="End Date"
                             onChange={handleChange}
                         />
@@ -655,7 +758,6 @@ const NewPromotion = () => {
                         <TextField
                             type="text"
                             name="reward_amount"
-                            value={nic || ""}
                             label="Reward Amount"
                             onChange={handleChange}
                         />
