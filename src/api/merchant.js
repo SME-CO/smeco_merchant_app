@@ -13,8 +13,14 @@ const getAllMerchants = (data) => {
     return axios.get(`/merchants`, data);
 } 
 
+const  uploadCover = (data, merchantId) => {
+    return axios.post(`/merchants/upload/cover/${merchantId}`, data);
+}
+
+
 export default {
     login: login,
     createMerchant: createMerchant,
-    getAllMerchants: getAllMerchants
+    getAllMerchants: getAllMerchants,
+    uploadCover : uploadCover
 };

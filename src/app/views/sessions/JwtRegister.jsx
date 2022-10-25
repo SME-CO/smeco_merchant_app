@@ -70,6 +70,9 @@ const JwtRegister = () => {
   const [alertMessage, setAlertMessage] = React.useState('');
   const [alertType, setAlertType] = React.useState('');
 
+  const [file, setFile] = useState();
+  const [fileName, setFileName] = useState("");
+
 
   const hideAlert = () => {
     if(isAlert){
@@ -85,10 +88,19 @@ const JwtRegister = () => {
     setLoading(true);
     console.log(values);
 
+    if(fileName == ''){
+      setAlertType('error');
+      setAlertMessage('Please Upload Cover Image');
+      setIsAlert(true);
+      setLoading(false);
+      return;
+    }
+
     if(values.cpassword != values.password){
       setAlertType('error');
       setAlertMessage('Confirm Password Mismatch');
       setIsAlert(true);
+      setLoading(false);
       return;
     }
 
@@ -106,7 +118,7 @@ const JwtRegister = () => {
       }
 
       const response = await ApiIndex.MerchantApi.createMerchant(formData);
-      console.log(response);
+      uploadFile(response.data.id);
       setLoading(false);
       navigate('/session/signin');
     } catch (error) {
@@ -123,6 +135,24 @@ const JwtRegister = () => {
 
       setIsAlert(true);
       setLoading(false);
+    }
+  };
+
+  const handleChangeFile = (event) => {
+    setFile(event.target.files[0]);
+    setFileName(event.target.files[0].name);
+  }
+
+  const uploadFile = async (merchantId) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fileName", fileName);
+
+    try {
+      const res = await ApiIndex.MerchantApi.uploadCover(formData, merchantId);
+      console.log(res);
+    } catch (ex) {
+      console.log(ex);
     }
   };
 
@@ -249,6 +279,17 @@ const JwtRegister = () => {
                     onBlur={handleBlur}
                     value={values.phoneNumber}
                     onChange={handleChange}
+                    sx={{ mb: 3 }}
+                  />
+
+                  <label onBlur={handleBlur}>Upload a cover image of the Business</label>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="file"
+                    variant="outlined"
+                    onBlur={handleBlur}
+                    onChange={handleChangeFile}
                     sx={{ mb: 3 }}
                   />
 

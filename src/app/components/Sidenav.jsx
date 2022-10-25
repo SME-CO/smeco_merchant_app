@@ -65,7 +65,6 @@ const Sidenav = ({ children }) => {
 
     if(window.localStorage.getItem('role') == 'merchant'){
       navigation_contents = [
-          { name: 'Dashboard', path: '/dashboard/merchant', icon: 'Quiz' },
           { name: 'Dashboard', path: '/dashboard/merchant', icon: 'dashboard' },
           { name: 'Checkout Customer', path: '/checkout', icon: 'dashboard' },
           {

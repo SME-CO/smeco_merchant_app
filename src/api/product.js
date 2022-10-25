@@ -13,7 +13,8 @@ const  createProduct = (data) => {
 }
 
 const  getProductsByCategory = (category) => {
-    return axios.get(`/products/categories/${category}`);
+    const merchant = parseInt(window.localStorage.getItem('merchant_id'));
+    return axios.get(`/products/categories/${category}/${merchant}`);
 } 
 
 export default {
