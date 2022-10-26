@@ -17,9 +17,14 @@ const  getProductsByCategory = (category) => {
     return axios.get(`/products/categories/${category}/${merchant}`);
 } 
 
+const  uploadImage = (data, productId) => {
+    return axios.post(`/products/upload/image/${productId}`, data);
+}
+
 export default {
     getProducts: getProducts,
     createProduct: createProduct,
     getProductsByCategory : getProductsByCategory,
-    productCheckout : productCheckout
+    productCheckout : productCheckout,
+    uploadImage : uploadImage
 };

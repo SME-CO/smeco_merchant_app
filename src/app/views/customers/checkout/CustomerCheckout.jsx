@@ -157,12 +157,25 @@ const CustomerCheckout = () => {
       if(selectedQuantity > 0 && selectedProduct!=null){
         const productExists = customerCart.filter(item => item.product.id == selectedProduct.id);
         if(productExists.length == 0){
+          var total = 0
+          var unitPrice = 0;
+          if(selectedProduct.discountPercentage){
+            let unitWithDiscount = selectedProduct.price - ((selectedProduct.discountPercentage/100) * selectedProduct.price);
+            total = unitWithDiscount * selectedQuantity;
+            unitPrice = unitWithDiscount;
+          }else{
+            total = selectedProduct.price * selectedQuantity;
+            unitPrice = selectedProduct.price;
+          }
+
           let item = {
             product : selectedProduct,
             purchaseType : 'normal',
             quantity : selectedQuantity,
-            unitPrice : selectedProduct.price,
-            total : selectedProduct.price * selectedQuantity
+            unitPrice : unitPrice,
+            unitPriceBeforeDiscount : selectedProduct.price,
+            total : total,
+            discount : selectedProduct.discountPercentage ? selectedProduct.discountPercentage : 0
           }  
           let totalCounter = totalAmount + item.total;
           setTotalAmount(totalCounter);
@@ -520,8 +533,10 @@ const CustomerCheckout = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Name</TableCell>
-                                    <TableCell align="right">Unit Price</TableCell>
+                                    <TableCell align="right">Unit Price BD</TableCell>
+                                    <TableCell align="right">Unit Price AD</TableCell>
                                     <TableCell align="right">Quantity</TableCell>
+                                    <TableCell align="right">Discount</TableCell>
                                     <TableCell align="right">Amount</TableCell>
                                     <TableCell align="right">Total</TableCell>
                                     <TableCell align="right">Remove</TableCell>
@@ -535,9 +550,11 @@ const CustomerCheckout = () => {
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
                                     <TableCell component="th" scope="row">{item.product.productName}</TableCell>
-                                    <TableCell align="right">{item.product.price}/=</TableCell>
+                                    <TableCell align="right">{item.unitPriceBeforeDiscount}/=</TableCell>
+                                    <TableCell align="right">{item.unitPrice}/=</TableCell>
                                     <TableCell align="right">{item.quantity}</TableCell>
-                                    <TableCell align="right">{item.quantity} &#215; {item.product.price}</TableCell>
+                                    <TableCell align="right">{item.discount}%</TableCell>
+                                    <TableCell align="right">{item.quantity} &#215; {item.unitPrice}</TableCell>
                                     <TableCell align="right">Rs.{item.total}</TableCell>
                                     <TableCell align="right"> <DeleteIcon onClick={()=>{handleDelete(item.product.id)}}> </DeleteIcon> </TableCell>
                                 </TableRow>

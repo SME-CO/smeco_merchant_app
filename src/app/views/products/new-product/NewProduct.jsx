@@ -69,33 +69,63 @@ const NewProduct = () => {
     //const [isOTPSent, setIsOTPSent] = useState(false);
     // const [openOTPSuccess, setOpenOTPSuccess] = React.useState(false);
     // const [openOTPFail, setOpenOTPFail] = React.useState(false);
+
+    const [file, setFile] = useState();
+    const [fileName, setFileName] = useState("");
+
+    const [isAlert, setIsAlert] = React.useState(false);
+    const [alertMessage, setAlertMessage] = React.useState('');
+    const [alertType, setAlertType] = React.useState('');
+
+
+    const hideAlert = () => {
+      if(isAlert){
+        setTimeout(() => {setIsAlert(false)}, 3000);
+      }
+    }
+
   
     useEffect(() => {
-      ValidatorForm.addValidationRule("isPasswordMatch", (value) => {
-        if (value !== state.password) return false;
-  
-        return true;
-      });
-      return () => ValidatorForm.removeValidationRule("isPasswordMatch");
-    }, [state.password]);
+      hideAlert();
+    }, [isAlert]);
   
     const handleSubmit = async (value) => {
       try {
 
-        const formData = {
-            productName : state.productName,
-            image : state.image,
-            price: state.price,
-            catagory: state.category,
-            offers :state.offers,
+        if(state.productName  && state.price && state.category){
+
+          const formData = {
+              productName : state.productName,
+              image : state.image,
+              price: state.price,
+              category: state.category,
+              merchantId : parseInt(window.localStorage.getItem('merchant_id')),
+          }
+          const response = await ApiIndex.ProductApi.createProduct(formData);
+          uploadImage(response.data.id)
+          setAlertType('success');
+          setAlertMessage(`Product, ${state.productName} was added successfully!`);
+          setIsAlert(true)
+          cleanForm();
+        }else{
+          setAlertType('error');
+          setAlertMessage('Please fill all required fields');
+          setIsAlert(true)
         }
 
-        console.log(formData);
-
-        const response = await ApiIndex.ProductApi.createProduct(formData);
-        cleanForm();
+    
       } catch (error) {
         console.log(error);
+        setAlertType('error');
+        if(error.code == 400) {
+          setAlertMessage(error.message);
+        }else if(error.code == 500) {
+          setAlertMessage("Sorry, something went wrong, Please try again later");
+        }else{
+          setAlertMessage("Sorry, server not connected, Please try again later");
+        }
+
+        setIsAlert(true);
       }
     };
 
@@ -113,6 +143,24 @@ const NewProduct = () => {
     const cleanForm = () => {
       setState({productName : "", image : "", price : "", category : "", offers : ""});
     }
+
+    const handleChangeFile = (event) => {
+      setFile(event.target.files[0]);
+      setFileName(event.target.files[0].name);
+    }
+
+    const uploadImage = async (productId) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", fileName);
+  
+      try {
+        const res = await ApiIndex.ProductApi.uploadImage(formData, productId);
+        console.log(res);
+      } catch (ex) {
+        console.log(ex);
+      }
+    };
    
 
   
@@ -127,6 +175,13 @@ const NewProduct = () => {
 
     return (
         <Container>
+             { isAlert && 
+            <Grid container alignItems="center" justifyContent="center" style={{ minHeight: '11vh' }}>
+              <Grid item xs={6}>
+                <Alert severity={alertType}>{alertMessage}</Alert>
+              </Grid>
+            </Grid>
+            }
             <SimpleCard title="New Product">
                 <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
                     <Grid container spacing={6}>
@@ -139,23 +194,24 @@ const NewProduct = () => {
                             value={productName || ""}
                             validators={["required"]}
                             errorMessages={["This field is required"]}
-                        />
+                        /> <br/>
             
-                        <Grid container spacing={2}>
+                        <Grid container spacing={2}> 
 
                             <Grid item xs={6}>
+                              <label>Upload Product Image</label>
                               <TextField
-                                  type="file"
-                                  name="image"
-                                  label="image "
-                                  value={image || ""}
-                                  onChange={handleChange}
-                                  validators={["required"]}
-                                  errorMessages={["this field is required"]}
-                                />
+                                fullWidth
+                                size="small"
+                                type="file"
+                                variant="outlined"
+                      
+                                onChange={handleChangeFile}
+                                sx={{ mb: 3 }}
+                              />
                           
                                 <TextField
-                                   type="text"
+                                   type="number"
                                    name="price"
                                    label="Enter The Price Of Product"
                                    value={price || ""}
@@ -165,53 +221,16 @@ const NewProduct = () => {
                                 />
                                  
                                 </Grid>
-
-                        {/* <RadioGroup
-                            row
-                            name="gender"
-                            sx={{ mb: 2 }}
-                            value={gender || ""}
-                            onChange={handleChange}
-                        >
-                                <FormControlLabel
-                                value="Male"
-                                label="Male"
-                                labelPlacement="end"
-                                control={<Radio color="secondary" />}
-                                />
-                
-                                <FormControlLabel
-                                value="Female"
-                                label="Female"
-                                labelPlacement="end"
-                                control={<Radio color="secondary" />}
-                                />
-            
-                        </RadioGroup> */}
                         </Grid>
                     
             
                         <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
                         <Fragment>
-                        {/* <AutoComplete
-                            options={suggestions}
-                            getOptionLabel={(option) => option.label}
-                            
-                            renderInput={(params) => (
-                            <TextField {...params}  name="category"  value={category || ""} 
-                            label="Catagory Type" variant="outlined" fullWidth
-                            onChange={handleChange}
-                             />
-                            )}
-                        /> */}
-
-
                           <FormControl fullWidth>
                                 <InputLabel id="demo-simple-select-label">Category</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    value={category || ""}
                                     name="category"
                                     label="Category"
                                     onChange={handleChangeCategory}
@@ -228,28 +247,6 @@ const NewProduct = () => {
                                 </Select>
                             </FormControl>   
                             <br /><br />
-
-                               {/* <TextField
-                                   type="text"
-                                   name="offers"
-                                   label="Enter The Offers Of Product"
-                                   value={offers || ""}
-                                   onChange={handleChange}
-                                   validators={["required"]}
-                                   errorMessages={["this field is required"]}
-                      />*/}
-
-                       {/* <AutoComplete
-                            options={suggestions2}
-                            getOptionLabel={(option) => option.label}
-                            renderInput={(value) => (
-                            <TextField {...value} label="Offres Type" variant="outlined" fullWidth
-                             />
-                            )}
-                        /> */}
-                            
-
-
                       </Fragment>
 
                         
@@ -263,18 +260,6 @@ const NewProduct = () => {
                     </Button>
                  </ValidatorForm>
             </SimpleCard>
-
-            {/* <Snackbar open={openOTPSuccess} autoHideDuration={6000}>
-              <Alert severity="success" sx={{ width: "100%" }} variant="filled">
-                  OTP sent Successfully!
-              </Alert>
-            </Snackbar>
-
-            <Snackbar open={openOTPFail} autoHideDuration={6000} >
-              <Alert severity="error" sx={{ width: "100%" }} variant="filled">
-                  Please Enter OTP
-              </Alert>
-            </Snackbar> */}
         </Container>
     );
   };
